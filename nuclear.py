@@ -518,59 +518,13 @@ def main():
             st.markdown("Espesor necesario para reducir la intensidad al 10%.")
         
         with col_info2:
-            st.subheader("🎯 Efectividad de materiales")
-            
-            efectividad = {
-                "Alta densidad atómica": ["Plomo (Pb)", "Wolframio (W)", "Uranio (U)"],
-                "Moderación neutrones": ["Agua (H₂O)", "Grafito (C)", "Hormigón"],
-                "Captura neutrones": ["Boro (B)", "Cadmio (Cd)", "Litio (Li)"],
-                "Propiedades mixtas": ["Acero", "Hormigón con boro", "Compuestos poliméricos"]
-            }
-            
-            for categoria, materiales in efectividad.items():
-                with st.expander(f"📌 {categoria}"):
-                    for mat in materiales:
-                        st.write(f"- {mat}")
-            
             st.subheader("📊 Factores a considerar")
             st.markdown("""
             1. **Tipo de radiación**: Gamma, neutrones, beta, alfa
             2. **Energía**: Afecta significativamente la atenuación
             3. **Densidad del material**: Mayor densidad → Mayor atenuación
             4. **Número atómico (Z)**: Importante para radiación electromagnética
-            5. **Costo y disponibilidad**
-            6. **Propiedades mecánicas y térmicas**
             """)
-        
-        # Ejemplo de cálculo
-        st.subheader("🧮 Ejemplo práctico")
-        
-        col_ej1, col_ej2 = st.columns(2)
-        
-        with col_ej1:
-            st.markdown("**Problema:**")
-            st.markdown("""
-            Se tiene una fuente de ⁶⁰Co que emite rayos gamma de 1.25 MeV
-            con una intensidad de 10⁶ partículas/s·cm².
-
-            ¿Qué espesor de plomo se necesita para reducir la intensidad
-            a 100 partículas/s·cm²?
-            """)
-        
-        with col_ej2:
-            st.markdown("**Solución:**")
-            st.latex(r"x = -\frac{1}{\mu} \ln\left(\frac{I}{I_0}\right)")
-            
-            # Cálculo
-            mu_plomo = 0.776  # cm⁻¹ para 1.25 MeV
-            x_necesario = -np.log(100/1e6) / mu_plomo
-            
-            st.markdown(f"""
-            - μ para Plomo a 1.25 MeV ≈ {mu_plomo} cm⁻¹
-            - Cálculo: x = -1/{mu_plomo:.3f} · ln(100/10⁶)
-            - **Resultado: x ≈ {x_necesario:.2f} cm de plomo**
-            """)
-    
     # Footer
     st.divider()
     st.caption("""
