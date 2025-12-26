@@ -527,276 +527,276 @@ def main():
         """)
 
     with tab2:
-    st.header("Tabla Periódica para Blindaje Radiológico")
-
-    # Generar tabla periódica
-    df_elementos = generar_tabla_periodica()
-
-    # Mostrar tabla periódica como cuadrícula interactiva
-    cols = st.columns(7)
-
-    for idx, row in df_elementos.iterrows():
-        col_idx = idx % 7
-        with cols[col_idx]:
-            # Botón para cada elemento con color personalizado
-            if st.button(
-                f"**{row['Simbolo']}**\n{row['Nombre']}",
-                key=f"elem_{row['Simbolo']}",
-                help=f"Z={row['Z']}, ρ={row['Densidad']} g/cm³",
-            ):
-                # Almacenar elemento seleccionado en session state
-                st.session_state['elemento_seleccionado'] = row['Simbolo']
-
-            # Información adicional en tooltip
-            st.caption(f"ρ={row['Densidad']} g/cm³")
-
-    st.divider()
-
-    # Si hay elemento seleccionado, mostrar gráfica y controles AUTOMÁTICAMENTE
-    if 'elemento_seleccionado' in st.session_state:
-        elem = st.session_state['elemento_seleccionado']
-        info = df_elementos[df_elementos['Simbolo'] == elem].iloc[0]
-        nombre_elemento = info['Nombre']
-        color_elemento = info['Color']
-        
-        st.subheader(f"Simulación para {nombre_elemento}")
-        
-        # ============================================
-        # TODA LA INFORMACIÓN UNIFICADA ANTES DE LA GRÁFICA
-        # ============================================
-        
-        # Fila 1: Información básica del material
-        col_fila1_1, col_fila1_2, col_fila1_3 = st.columns(3)
-        
-        with col_fila1_1:
-            st.metric("Elemento", nombre_elemento)
-            st.metric("Densidad", f"{info['Densidad']} g/cm³")
-        
-        with col_fila1_2:
-            st.metric("Grupo", info['Grupo'])
-            st.metric("Efectividad", info['Blindaje'])
-        
-        with col_fila1_3:
-            params = obtener_parametros_material(nombre_elemento)
-            
-            if tipo_radiacion in ["Gamma", "Rayos X"]:
-                mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
-                hvl, tvl = calcular_capas_hvl_tvl(mu)
-                st.metric("Coeficiente μ", f"{mu:.4f} cm⁻¹")
-                st.metric("HVL", f"{hvl:.2f} cm")
-                st.metric("TVL", f"{tvl:.2f} cm")
-            elif tipo_radiacion == "Beta":
-                if energia_mev < 0.8:
-                    alcance_gcm2 = 0.15 * energia_mev ** 1.5
-                else:
-                    alcance_gcm2 = 0.5 * energia_mev
-                alcance_cm = alcance_gcm2 / params['densidad']
-                st.metric("Alcance total", f"{alcance_cm:.2f} cm")
-                st.metric("Energía", f"{energia_mev:.2f} MeV")
-            elif tipo_radiacion == "Alfa":
-                alcance_aire = 0.3 * energia_mev ** 1.5
-                alcance_material = alcance_aire * (0.001225 / params['densidad'])
-                st.metric("Alcance total", f"{alcance_material*1000:.1f} mm")
-                st.metric("Energía", f"{energia_mev:.2f} MeV")
-            elif tipo_radiacion == "Neutrones":
-                sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
-                st.metric("Sección eficaz σ", f"{sigma:.1f} barns")
-                st.metric("Long. atenuación", f"{1/(params['densidad_atomica']*sigma*1e-24):.1f} cm")
-        
-        # Divider entre información y controles
+        st.header("Tabla Periódica para Blindaje Radiológico")
+    
+        # Generar tabla periódica
+        df_elementos = generar_tabla_periodica()
+    
+        # Mostrar tabla periódica como cuadrícula interactiva
+        cols = st.columns(7)
+    
+        for idx, row in df_elementos.iterrows():
+            col_idx = idx % 7
+            with cols[col_idx]:
+                # Botón para cada elemento con color personalizado
+                if st.button(
+                    f"**{row['Simbolo']}**\n{row['Nombre']}",
+                    key=f"elem_{row['Simbolo']}",
+                    help=f"Z={row['Z']}, ρ={row['Densidad']} g/cm³",
+                ):
+                    # Almacenar elemento seleccionado en session state
+                    st.session_state['elemento_seleccionado'] = row['Simbolo']
+    
+                # Información adicional en tooltip
+                st.caption(f"ρ={row['Densidad']} g/cm³")
+    
         st.divider()
-        
-        # Fila 2: Parámetros de simulación y resultados (AHORA CON 3 COLUMNAS)
-        col_fila2_1, col_fila2_2, col_fila2_3 = st.columns(3)
-        
-        with col_fila2_1:
-            st.markdown("#### ⚙️ Parámetros entrada")
-            st.metric("Energía", energia_display)
-            st.metric("Intensidad inicial (I₀)", f"{I0:.2e}")
-        
-        with col_fila2_2:
-            st.markdown("#### 📊 Resultados principales")
-            # Calcular atenuación automáticamente (usaremos el valor inicial)
-            # Nota: Para el cálculo inicial, usamos un espesor predeterminado
-            espesor_inicial = 0.1 if tipo_radiacion == "Alfa" else 10.0
-            I_final_inicial = calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, espesor_inicial)
-            atenuacion_inicial = (1 - I_final_inicial/I0) * 100 if I0 > 0 else 0
+    
+        # Si hay elemento seleccionado, mostrar gráfica y controles AUTOMÁTICAMENTE
+        if 'elemento_seleccionado' in st.session_state:
+            elem = st.session_state['elemento_seleccionado']
+            info = df_elementos[df_elementos['Simbolo'] == elem].iloc[0]
+            nombre_elemento = info['Nombre']
+            color_elemento = info['Color']
             
-            st.metric("Atenuación inicial", f"{atenuacion_inicial:.1f}%")
-            st.metric("Intensidad inicial (I₀)", f"{I0:.2e}")
-            st.metric("Transmisión inicial", f"{I_final_inicial/I0:.2e}")
-        
-        with col_fila2_3:
-            st.markdown("#### 📈 Información adicional")
+            st.subheader(f"Simulación para {nombre_elemento}")
             
-            # Esta información se actualizará después con el slider
-            if tipo_radiacion in ["Gamma", "Rayos X"]:
-                mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
-                hvl, tvl = calcular_capas_hvl_tvl(mu)
-                st.metric("HVL", f"{hvl:.2f} cm")
-                st.metric("TVL", f"{tvl:.2f} cm")
-            elif tipo_radiacion == "Beta":
-                if energia_mev < 0.8:
-                    alcance_gcm2 = 0.15 * energia_mev ** 1.5
-                else:
-                    alcance_gcm2 = 0.5 * energia_mev
-                alcance_cm = alcance_gcm2 / params['densidad']
-                st.metric("Alcance total", f"{alcance_cm:.2f} cm")
-            elif tipo_radiacion == "Alfa":
-                alcance_aire = 0.3 * energia_mev ** 1.5
-                alcance_material = alcance_aire * (0.001225 / params['densidad'])
-                st.metric("Alcance total", f"{alcance_material*1000:.1f} mm")
-            elif tipo_radiacion == "Neutrones":
-                sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
-                st.metric("Sección eficaz σ", f"{sigma:.1f} barns")
-        
-        # ============================================
-        # SLIDER DEL ESPESOR - AHORA SOLO Y CENTRADO
-        # ============================================
-        st.divider()
-        
-        # Espacio dedicado para el slider
-        st.markdown(f"### 🎚️ Control de espesor para {nombre_elemento}")
-        
-        # Crear un contenedor centrado para el slider
-        slider_container = st.container()
-        
-        with slider_container:
-            # Determinar valor inicial para el slider
-            espesor_default = min(0.1 if tipo_radiacion == "Alfa" else 10.0, float(espesor_max))
+            # ============================================
+            # TODA LA INFORMACIÓN UNIFICADA ANTES DE LA GRÁFICA
+            # ============================================
             
-            # Slider para espesor que se actualiza automáticamente
-            espesor = st.slider(
-                f"**Espesor del material (cm):**",
-                min_value=0.0,
-                max_value=float(espesor_max),
-                value=espesor_default,
-                step=0.001 if tipo_radiacion == "Alfa" else 0.5,
-                key=f"espesor_{elem}"
-            )
+            # Fila 1: Información básica del material
+            col_fila1_1, col_fila1_2, col_fila1_3 = st.columns(3)
             
-            # Mostrar información adicional relacionada con el espesor seleccionado
-            col_info1, col_info2, col_info3 = st.columns(3)
+            with col_fila1_1:
+                st.metric("Elemento", nombre_elemento)
+                st.metric("Densidad", f"{info['Densidad']} g/cm³")
             
-            with col_info1:
-                # Calcular atenuación con el espesor seleccionado
-                I_final = calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, espesor)
-                atenuacion = (1 - I_final/I0) * 100 if I0 > 0 else 0
-                st.metric("**Atenuación actual**", f"{atenuacion:.1f}%")
+            with col_fila1_2:
+                st.metric("Grupo", info['Grupo'])
+                st.metric("Efectividad", info['Blindaje'])
             
-            with col_info2:
-                st.metric("**Intensidad final (I)**", f"{I_final:.2e}")
-            
-            with col_info3:
-                # Información específica según el tipo de radiación
-                if tipo_radiacion == "Beta":
+            with col_fila1_3:
+                params = obtener_parametros_material(nombre_elemento)
+                
+                if tipo_radiacion in ["Gamma", "Rayos X"]:
+                    mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                    hvl, tvl = calcular_capas_hvl_tvl(mu)
+                    st.metric("Coeficiente μ", f"{mu:.4f} cm⁻¹")
+                    st.metric("HVL", f"{hvl:.2f} cm")
+                    st.metric("TVL", f"{tvl:.2f} cm")
+                elif tipo_radiacion == "Beta":
                     if energia_mev < 0.8:
                         alcance_gcm2 = 0.15 * energia_mev ** 1.5
                     else:
                         alcance_gcm2 = 0.5 * energia_mev
                     alcance_cm = alcance_gcm2 / params['densidad']
-                    porcentaje = (espesor/alcance_cm*100) if alcance_cm > 0 else 0
-                    st.metric("**% del alcance**", f"{porcentaje:.1f}%")
-                    if espesor >= alcance_cm:
-                        st.success("✅ Alcance completo")
-                
+                    st.metric("Alcance total", f"{alcance_cm:.2f} cm")
+                    st.metric("Energía", f"{energia_mev:.2f} MeV")
                 elif tipo_radiacion == "Alfa":
                     alcance_aire = 0.3 * energia_mev ** 1.5
                     alcance_material = alcance_aire * (0.001225 / params['densidad'])
-                    porcentaje = (espesor/alcance_material*100) if alcance_material > 0 else 0
-                    st.metric("**% del alcance**", f"{porcentaje:.1f}%")
-                    if espesor >= alcance_material:
-                        st.success("✅ Alcance completo")
+                    st.metric("Alcance total", f"{alcance_material*1000:.1f} mm")
+                    st.metric("Energía", f"{energia_mev:.2f} MeV")
+                elif tipo_radiacion == "Neutrones":
+                    sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
+                    st.metric("Sección eficaz σ", f"{sigma:.1f} barns")
+                    st.metric("Long. atenuación", f"{1/(params['densidad_atomica']*sigma*1e-24):.1f} cm")
+            
+            # Divider entre información y controles
+            st.divider()
+            
+            # Fila 2: Parámetros de simulación y resultados (AHORA CON 3 COLUMNAS)
+            col_fila2_1, col_fila2_2, col_fila2_3 = st.columns(3)
+            
+            with col_fila2_1:
+                st.markdown("#### ⚙️ Parámetros entrada")
+                st.metric("Energía", energia_display)
+                st.metric("Intensidad inicial (I₀)", f"{I0:.2e}")
+            
+            with col_fila2_2:
+                st.markdown("#### 📊 Resultados principales")
+                # Calcular atenuación automáticamente (usaremos el valor inicial)
+                # Nota: Para el cálculo inicial, usamos un espesor predeterminado
+                espesor_inicial = 0.1 if tipo_radiacion == "Alfa" else 10.0
+                I_final_inicial = calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, espesor_inicial)
+                atenuacion_inicial = (1 - I_final_inicial/I0) * 100 if I0 > 0 else 0
                 
-                elif tipo_radiacion in ["Gamma", "Rayos X"]:
+                st.metric("Atenuación inicial", f"{atenuacion_inicial:.1f}%")
+                st.metric("Intensidad inicial (I₀)", f"{I0:.2e}")
+                st.metric("Transmisión inicial", f"{I_final_inicial/I0:.2e}")
+            
+            with col_fila2_3:
+                st.markdown("#### 📈 Información adicional")
+                
+                # Esta información se actualizará después con el slider
+                if tipo_radiacion in ["Gamma", "Rayos X"]:
                     mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
                     hvl, tvl = calcular_capas_hvl_tvl(mu)
-                    num_hvl = espesor / hvl if hvl > 0 else 0
-                    st.metric("**Nº de HVLs**", f"{num_hvl:.2f}")
-        
-        # Divider antes de la gráfica
-        st.divider()
-        
-        # ============================================
-        # GRÁFICA DESPUÉS DEL SLIDER
-        # ============================================
-        
-        # Calcular curva de atenuación para la gráfica
-        espesores_grafica = np.linspace(0, espesor_max, 500)
-        intensidades_grafica = [calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, x) for x in espesores_grafica]
-        
-        # Crear gráfica con Plotly
-        fig = go.Figure()
-        
-        # Curva principal
-        fig.add_trace(go.Scatter(
-            x=espesores_grafica,
-            y=intensidades_grafica,
-            mode='lines',
-            name=f'{nombre_elemento}',
-            line=dict(color=color_elemento, width=3),
-            hovertemplate="Espesor: %{x:.3f} cm<br>Intensidad: %{y:.2e}<extra></extra>"
-        ))
-        
-        # Línea vertical para el espesor seleccionado
-        fig.add_vline(
-            x=espesor,
-            line_dash="solid",
-            line_color="green",
-            line_width=2,
-            annotation_text=f"Espesor seleccionado: {espesor:.3f} cm",
-            annotation_position="top left"
-        )
-        
-        # Punto en la curva para el espesor seleccionado
-        fig.add_trace(go.Scatter(
-            x=[espesor],
-            y=[I_final],
-            mode='markers',
-            name=f'I = {I_final:.2e}',
-            marker=dict(size=12, color='green'),
-            hovertemplate=f"Espesor: {espesor:.3f} cm<br>Intensidad: {I_final:.2e}<extra></extra>"
-        ))
-        
-        # Líneas de HVL y TVL (solo para fotones)
-        if tipo_radiacion in ["Gamma", "Rayos X"] and mostrar_hvl:
-            mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
-            hvl, _ = calcular_capas_hvl_tvl(mu)
-            if hvl > 0 and hvl <= espesor_max:
-                fig.add_vline(
-                    x=hvl,
-                    line_dash="dash",
-                    line_color="red",
-                    annotation_text=f"HVL = {hvl:.2f} cm",
-                    annotation_position="top right"
+                    st.metric("HVL", f"{hvl:.2f} cm")
+                    st.metric("TVL", f"{tvl:.2f} cm")
+                elif tipo_radiacion == "Beta":
+                    if energia_mev < 0.8:
+                        alcance_gcm2 = 0.15 * energia_mev ** 1.5
+                    else:
+                        alcance_gcm2 = 0.5 * energia_mev
+                    alcance_cm = alcance_gcm2 / params['densidad']
+                    st.metric("Alcance total", f"{alcance_cm:.2f} cm")
+                elif tipo_radiacion == "Alfa":
+                    alcance_aire = 0.3 * energia_mev ** 1.5
+                    alcance_material = alcance_aire * (0.001225 / params['densidad'])
+                    st.metric("Alcance total", f"{alcance_material*1000:.1f} mm")
+                elif tipo_radiacion == "Neutrones":
+                    sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
+                    st.metric("Sección eficaz σ", f"{sigma:.1f} barns")
+            
+            # ============================================
+            # SLIDER DEL ESPESOR - AHORA SOLO Y CENTRADO
+            # ============================================
+            st.divider()
+            
+            # Espacio dedicado para el slider
+            st.markdown(f"### 🎚️ Control de espesor para {nombre_elemento}")
+            
+            # Crear un contenedor centrado para el slider
+            slider_container = st.container()
+            
+            with slider_container:
+                # Determinar valor inicial para el slider
+                espesor_default = min(0.1 if tipo_radiacion == "Alfa" else 10.0, float(espesor_max))
+                
+                # Slider para espesor que se actualiza automáticamente
+                espesor = st.slider(
+                    f"**Espesor del material (cm):**",
+                    min_value=0.0,
+                    max_value=float(espesor_max),
+                    value=espesor_default,
+                    step=0.001 if tipo_radiacion == "Alfa" else 0.5,
+                    key=f"espesor_{elem}"
                 )
-        
-        if tipo_radiacion in ["Gamma", "Rayos X"] and mostrar_tvl:
-            mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
-            _, tvl = calcular_capas_hvl_tvl(mu)
-            if tvl > 0 and tvl <= espesor_max:
-                fig.add_vline(
-                    x=tvl,
-                    line_dash="dot",
-                    line_color="blue",
-                    annotation_text=f"TVL = {tvl:.2f} cm",
-                    annotation_position="top right"
-                )
-        
-        # Configurar layout
-        fig.update_layout(
-            title=f'📈 Gráfica de atenuación: {tipo_radiacion} ({energia_display}) en {nombre_elemento}',
-            xaxis_title='Espesor del blindaje (cm)',
-            yaxis_title='Intensidad transmitida (partículas/s·cm²)',
-            hovermode='x unified',
-            template='plotly_white',
-            height=500
-        )
-        
-        if escala_log:
-            fig.update_yaxes(type="log", exponentformat='power')
-        
-        st.plotly_chart(fig, width='stretch')
+                
+                # Mostrar información adicional relacionada con el espesor seleccionado
+                col_info1, col_info2, col_info3 = st.columns(3)
+                
+                with col_info1:
+                    # Calcular atenuación con el espesor seleccionado
+                    I_final = calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, espesor)
+                    atenuacion = (1 - I_final/I0) * 100 if I0 > 0 else 0
+                    st.metric("**Atenuación actual**", f"{atenuacion:.1f}%")
+                
+                with col_info2:
+                    st.metric("**Intensidad final (I)**", f"{I_final:.2e}")
+                
+                with col_info3:
+                    # Información específica según el tipo de radiación
+                    if tipo_radiacion == "Beta":
+                        if energia_mev < 0.8:
+                            alcance_gcm2 = 0.15 * energia_mev ** 1.5
+                        else:
+                            alcance_gcm2 = 0.5 * energia_mev
+                        alcance_cm = alcance_gcm2 / params['densidad']
+                        porcentaje = (espesor/alcance_cm*100) if alcance_cm > 0 else 0
+                        st.metric("**% del alcance**", f"{porcentaje:.1f}%")
+                        if espesor >= alcance_cm:
+                            st.success("✅ Alcance completo")
+                    
+                    elif tipo_radiacion == "Alfa":
+                        alcance_aire = 0.3 * energia_mev ** 1.5
+                        alcance_material = alcance_aire * (0.001225 / params['densidad'])
+                        porcentaje = (espesor/alcance_material*100) if alcance_material > 0 else 0
+                        st.metric("**% del alcance**", f"{porcentaje:.1f}%")
+                        if espesor >= alcance_material:
+                            st.success("✅ Alcance completo")
+                    
+                    elif tipo_radiacion in ["Gamma", "Rayos X"]:
+                        mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                        hvl, tvl = calcular_capas_hvl_tvl(mu)
+                        num_hvl = espesor / hvl if hvl > 0 else 0
+                        st.metric("**Nº de HVLs**", f"{num_hvl:.2f}")
+            
+            # Divider antes de la gráfica
+            st.divider()
+            
+            # ============================================
+            # GRÁFICA DESPUÉS DEL SLIDER
+            # ============================================
+            
+            # Calcular curva de atenuación para la gráfica
+            espesores_grafica = np.linspace(0, espesor_max, 500)
+            intensidades_grafica = [calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, x) for x in espesores_grafica]
+            
+            # Crear gráfica con Plotly
+            fig = go.Figure()
+            
+            # Curva principal
+            fig.add_trace(go.Scatter(
+                x=espesores_grafica,
+                y=intensidades_grafica,
+                mode='lines',
+                name=f'{nombre_elemento}',
+                line=dict(color=color_elemento, width=3),
+                hovertemplate="Espesor: %{x:.3f} cm<br>Intensidad: %{y:.2e}<extra></extra>"
+            ))
+            
+            # Línea vertical para el espesor seleccionado
+            fig.add_vline(
+                x=espesor,
+                line_dash="solid",
+                line_color="green",
+                line_width=2,
+                annotation_text=f"Espesor seleccionado: {espesor:.3f} cm",
+                annotation_position="top left"
+            )
+            
+            # Punto en la curva para el espesor seleccionado
+            fig.add_trace(go.Scatter(
+                x=[espesor],
+                y=[I_final],
+                mode='markers',
+                name=f'I = {I_final:.2e}',
+                marker=dict(size=12, color='green'),
+                hovertemplate=f"Espesor: {espesor:.3f} cm<br>Intensidad: {I_final:.2e}<extra></extra>"
+            ))
+            
+            # Líneas de HVL y TVL (solo para fotones)
+            if tipo_radiacion in ["Gamma", "Rayos X"] and mostrar_hvl:
+                mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                hvl, _ = calcular_capas_hvl_tvl(mu)
+                if hvl > 0 and hvl <= espesor_max:
+                    fig.add_vline(
+                        x=hvl,
+                        line_dash="dash",
+                        line_color="red",
+                        annotation_text=f"HVL = {hvl:.2f} cm",
+                        annotation_position="top right"
+                    )
+            
+            if tipo_radiacion in ["Gamma", "Rayos X"] and mostrar_tvl:
+                mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                _, tvl = calcular_capas_hvl_tvl(mu)
+                if tvl > 0 and tvl <= espesor_max:
+                    fig.add_vline(
+                        x=tvl,
+                        line_dash="dot",
+                        line_color="blue",
+                        annotation_text=f"TVL = {tvl:.2f} cm",
+                        annotation_position="top right"
+                    )
+            
+            # Configurar layout
+            fig.update_layout(
+                title=f'📈 Gráfica de atenuación: {tipo_radiacion} ({energia_display}) en {nombre_elemento}',
+                xaxis_title='Espesor del blindaje (cm)',
+                yaxis_title='Intensidad transmitida (partículas/s·cm²)',
+                hovermode='x unified',
+                template='plotly_white',
+                height=500
+            )
+            
+            if escala_log:
+                fig.update_yaxes(type="log", exponentformat='power')
+            
+            st.plotly_chart(fig, width='stretch')
 
     with tab3:
         st.header("Comparación de Materiales de Blindaje")
