@@ -583,8 +583,7 @@ def main():
                     mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
                     hvl, tvl = calcular_capas_hvl_tvl(mu)
                     st.metric("Coeficiente μ", f"{mu:.4f} cm⁻¹")
-                    st.metric("HVL", f"{hvl:.2f} cm")
-                    st.metric("TVL", f"{tvl:.2f} cm")
+
                 elif tipo_radiacion == "Beta":
                     if energia_mev < 0.8:
                         alcance_gcm2 = 0.15 * energia_mev ** 1.5
