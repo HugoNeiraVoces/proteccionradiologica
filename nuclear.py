@@ -665,54 +665,25 @@ def main():
                 # Determinar valor inicial para el slider
                 espesor_default = min(0.1 if tipo_radiacion == "Alfa" else 10.0, float(espesor_max))
                 
-                # Slider para espesor que se actualiza automáticamente
-                espesor = st.slider(
-                    f"**Espesor del material (cm):**",
-                    min_value=0.0,
-                    max_value=float(espesor_max),
-                    value=espesor_default,
-                    step=0.001 if tipo_radiacion == "Alfa" else 0.5,
-                    key=f"espesor_{elem}"
-                )
+                # Crear dos columnas: una para el slider y otra para el porcentaje
+                col_slider, col_percent = st.columns([3, 1])
                 
-                # Mostrar información adicional relacionada con el espesor seleccionado
-                col_info1, col_info2, col_info3 = st.columns(3)
+                with col_slider:
+                    # Slider para espesor
+                    espesor = st.slider(
+                        f"**Espesor de {nombre_elemento} (cm):**",
+                        min_value=0.0,
+                        max_value=float(espesor_max),
+                        value=espesor_default,
+                        step=0.001 if tipo_radiacion == "Alfa" else 0.5,
+                        key=f"espesor_{elem}"
+                    )
                 
-                with col_info1:
-                    # Calcular atenuación con el espesor seleccionado
+                with col_percent:
+                    # Calcular y mostrar solo el porcentaje de atenuación
                     I_final = calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, espesor)
                     atenuacion = (1 - I_final/I0) * 100 if I0 > 0 else 0
-                    st.metric("**Atenuación actual**", f"{atenuacion:.1f}%")
-                
-                with col_info2:
-                    st.metric("**Intensidad final (I)**", f"{I_final:.2e}")
-                
-                with col_info3:
-                    # Información específica según el tipo de radiación
-                    if tipo_radiacion == "Beta":
-                        if energia_mev < 0.8:
-                            alcance_gcm2 = 0.15 * energia_mev ** 1.5
-                        else:
-                            alcance_gcm2 = 0.5 * energia_mev
-                        alcance_cm = alcance_gcm2 / params['densidad']
-                        porcentaje = (espesor/alcance_cm*100) if alcance_cm > 0 else 0
-                        st.metric("**% del alcance**", f"{porcentaje:.1f}%")
-                        if espesor >= alcance_cm:
-                            st.success("✅ Alcance completo")
-                    
-                    elif tipo_radiacion == "Alfa":
-                        alcance_aire = 0.3 * energia_mev ** 1.5
-                        alcance_material = alcance_aire * (0.001225 / params['densidad'])
-                        porcentaje = (espesor/alcance_material*100) if alcance_material > 0 else 0
-                        st.metric("**% del alcance**", f"{porcentaje:.1f}%")
-                        if espesor >= alcance_material:
-                            st.success("✅ Alcance completo")
-                    
-                    elif tipo_radiacion in ["Gamma", "Rayos X"]:
-                        mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
-                        hvl, tvl = calcular_capas_hvl_tvl(mu)
-                        num_hvl = espesor / hvl if hvl > 0 else 0
-                        st.metric("**Nº de HVLs**", f"{num_hvl:.2f}")
+                    st.metric("**Atenuación**", f"{atenuacion:.1f}%")
             
             # Divider antes de la gráfica
             st.divider()
