@@ -9,12 +9,6 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from plotly.subplots import make_subplots
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-from PIL import Image
-import io
-import base64
 
 # Configuración de la página
 st.set_page_config(
@@ -337,7 +331,8 @@ def main():
             ]
         }
         
-        st.dataframe(pd.DataFrame(datos), use_container_width=True)
+        df_datos = pd.DataFrame(datos)
+        st.dataframe(df_datos, width='stretch')
         
         st.info("""
         💡 **Tip:** Comienza seleccionando un tipo de radiación en la barra lateral, 
@@ -486,10 +481,11 @@ def main():
                 height=500
             )
 
+            # CORRECCIÓN AQUÍ: usar update_yaxes en lugar de update_yaxis
             if escala_log:
-                fig.update_yaxis(type="log", exponentformat='power')
+                fig.update_yaxes(type="log", exponentformat='power')
 
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
             # Mostrar información adicional
             col1, col2, col3 = st.columns(3)
@@ -577,10 +573,11 @@ def main():
                 height=500
             )
 
+            # CORRECCIÓN AQUÍ TAMBIÉN: usar update_yaxes en lugar de update_yaxis
             if escala_log:
-                fig_comparativa.update_yaxis(type="log", exponentformat='power')
+                fig_comparativa.update_yaxes(type="log", exponentformat='power')
 
-            st.plotly_chart(fig_comparativa, use_container_width=True)
+            st.plotly_chart(fig_comparativa, width='stretch')
 
             # Tabla comparativa
             st.subheader("Tabla comparativa")
@@ -601,11 +598,12 @@ def main():
                     'HVL (cm)': f"{hvl:.2f}",
                     'TVL (cm)': f"{tvl:.2f}",
                     'Densidad (g/cm³)': densidad,
-                    'Aten. a {espesor_max}cm': f"{atenuacion:.1f}%",
+                    f'Aten. a {espesor_max}cm': f"{atenuacion:.1f}%",
                     'Efectividad': df_elementos[df_elementos['Nombre'] == material]['Blindaje'].iloc[0]
                 })
 
-            st.dataframe(pd.DataFrame(datos_comparacion), use_container_width=True)
+            df_comparacion = pd.DataFrame(datos_comparacion)
+            st.dataframe(df_comparacion, width='stretch')
 
     with tab5:
         st.header("Fundamentos Teóricos")
@@ -723,7 +721,6 @@ def main():
     st.caption("""
     **Simulador desarrollado para el trabajo de Física Nuclear** |
     Protección Radiológica y Sistemas de Blindaje Avanzado |
-    Universidad [Tu Universidad] | Curso 2024 |
     Los valores de coeficientes de atenuación son aproximados basados en datos de NIST XCOM y referencias de protección radiológica
     """)
 
