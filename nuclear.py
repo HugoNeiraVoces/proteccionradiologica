@@ -1,6 +1,6 @@
 """
 DASHBOARD INTERACTIVO DE PROTECCIÓN RADIOLÓGICA
-Streamlit app para simulación de blindaje - MODELOS CORRECTOS
+Streamlit app para simulación de blindaje - VERSIÓN FINAL
 Autor: Estudiante de Física Nuclear
 """
 
@@ -8,7 +8,6 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
 
 # Configuración de la página
 st.set_page_config(
@@ -19,7 +18,7 @@ st.set_page_config(
 )
 
 # ============================================================================
-# FUNCIONES DE CÁLCULO - MODELOS CORRECTOS POR TIPO DE RADIACIÓN
+# FUNCIONES DE CÁLCULO - MODELOS CIENTÍFICAMENTE CORRECTOS
 # ============================================================================
 
 def calcular_atenuacion_fotones(I0, mu, x):
@@ -28,17 +27,12 @@ def calcular_atenuacion_fotones(I0, mu, x):
 
 def calcular_atenuacion_beta(I0, energia_mev, densidad_material, x):
     """
-    Modelo simplificado para partículas beta
-    Basado en alcance máximo (range) aproximado
+    Modelo simplificado para partículas beta - alcance máximo
     """
-    # Alcance aproximado en g/cm² (fórmula empírica para electrones)
-    # R = 0.412 * E^(1.265-0.0954*ln(E)) para 0.01 < E < 2.5 MeV
-    # Simplificado: R ≈ 0.5 * E_max para E > 0.8 MeV (en g/cm²)
-    
     if energia_mev <= 0:
         return I0
     
-    # Alcance en g/cm² (aproximación)
+    # Alcance aproximado en g/cm²
     if energia_mev < 0.8:
         alcance_gcm2 = 0.15 * energia_mev ** 1.5
     else:
@@ -51,136 +45,101 @@ def calcular_atenuacion_beta(I0, energia_mev, densidad_material, x):
     if espesor_masico >= alcance_gcm2:
         return 0.0
     
-    # Modelo simplificado: lineal hasta el alcance
-    # En realidad es más complejo (curva de Bragg), pero simplificamos
+    # Modelo simplificado
     fraccion_atenuada = espesor_masico / alcance_gcm2
-    return I0 * (1 - fraccion_atenuada ** 2)  # Aproximación cuadrática
+    return I0 * (1 - fraccion_atenuada ** 2)
 
 def calcular_atenuacion_neutrones(I0, sigma_total, densidad_atomica, x):
     """
-    Modelo para neutrones - atenucación exponencial PERO con sección eficaz
-    I(x) = I0 * exp(-N * σ_total * x)
-    donde N = densidad atómica (átomos/cm³)
+    Modelo para neutrones - atenuación exponencial con sección eficaz
     """
-    # σ_total en barns (1 barn = 1e-24 cm²)
-    sigma_cm2 = sigma_total * 1e-24
-    # Densidad atómica aproximada (átomos/cm³)
+    sigma_cm2 = sigma_total * 1e-24  # barns a cm²
     N = densidad_atomica
-    
     return I0 * np.exp(-N * sigma_cm2 * x)
 
 def calcular_atenuacion_alfa(I0, energia_mev, densidad_material, x):
     """
     Modelo para partículas alfa - alcance muy corto
     """
-    # Alcance aproximado para alfa en aire: R ≈ 0.3 * E^(3/2) cm (en aire)
-    # En otros materiales: R_material = R_aire * (ρ_aire/ρ_material)
-    
     if energia_mev <= 0:
         return I0
     
     # Alcance en aire (cm)
     alcance_aire = 0.3 * energia_mev ** 1.5
-    
-    # Densidad del aire (g/cm³)
     densidad_aire = 0.001225
-    
-    # Alcance en el material (cm)
     alcance_material = alcance_aire * (densidad_aire / densidad_material)
     
     # Si el espesor es mayor que el alcance, intensidad = 0
     if x >= alcance_material:
         return 0.0
     
-    # Modelo simplificado: caída brusca cerca del alcance
     fraccion = x / alcance_material
     return I0 * (1 - fraccion ** 3)
 
-def obtener_parametros_material(elemento, energia_mev, tipo_radiacion):
-    """Obtiene parámetros necesarios según tipo de radiación"""
-    # Base de datos de materiales
+def obtener_parametros_material(elemento):
+    """Obtiene parámetros físicos del material"""
     materiales = {
         'Plomo': {
             'densidad': 11.34,
             'Z_efectivo': 82,
-            'sigma_neutrones': 5.0,  # barns (aproximado para 1 MeV)
-            'densidad_atomica': 3.3e22  # átomos/cm³
+            'sigma_neutrones': 5.0,
+            'densidad_atomica': 3.3e22,
+            'Color': '#A0522D'
         },
         'Acero': {
             'densidad': 7.85,
             'Z_efectivo': 26,
             'sigma_neutrones': 3.0,
-            'densidad_atomica': 8.5e22
+            'densidad_atomica': 8.5e22,
+            'Color': '#778899'
         },
         'Hormigón': {
             'densidad': 2.35,
             'Z_efectivo': 'mix',
             'sigma_neutrones': 8.0,
-            'densidad_atomica': 1.0e23
+            'densidad_atomica': 1.0e23,
+            'Color': '#A9A9A9'
         },
         'Agua': {
             'densidad': 1.00,
             'Z_efectivo': 'mix',
-            'sigma_neutrones': 40.0,  # Alta para neutrones térmicos
-            'densidad_atomica': 3.3e22
+            'sigma_neutrones': 40.0,
+            'densidad_atomica': 3.3e22,
+            'Color': '#1E90FF'
         },
         'Wolframio': {
             'densidad': 19.25,
             'Z_efectivo': 74,
             'sigma_neutrones': 4.5,
-            'densidad_atomica': 6.3e22
+            'densidad_atomica': 6.3e22,
+            'Color': '#FFD700'
         },
         'Uranio': {
             'densidad': 19.10,
             'Z_efectivo': 92,
             'sigma_neutrones': 7.0,
-            'densidad_atomica': 4.8e22
+            'densidad_atomica': 4.8e22,
+            'Color': '#000000'
         },
         'Boro': {
             'densidad': 2.34,
             'Z_efectivo': 5,
-            'sigma_neutrones': 100.0,  # Muy alto para captura de neutrones
-            'densidad_atomica': 1.3e23
+            'sigma_neutrones': 100.0,
+            'densidad_atomica': 1.3e23,
+            'Color': '#FFA500'
         }
     }
     
-    if elemento in materiales:
-        return materiales[elemento]
-    else:
-        # Valores por defecto
-        return {
-            'densidad': 2.0,
-            'Z_efectivo': 10,
-            'sigma_neutrones': 5.0,
-            'densidad_atomica': 5e22
-        }
-
-def calcular_atenuacion_general(I0, elemento, energia_mev, tipo_radiacion, x):
-    """Función principal que selecciona el modelo correcto"""
-    params = obtener_parametros_material(elemento, energia_mev, tipo_radiacion)
-    
-    if tipo_radiacion in ["Gamma", "Rayos X"]:
-        # Para fotones, necesitamos coeficiente de atenuación lineal
-        mu = obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion)
-        return calcular_atenuacion_fotones(I0, mu, x)
-    
-    elif tipo_radiacion == "Beta":
-        return calcular_atenuacion_beta(I0, energia_mev, params['densidad'], x)
-    
-    elif tipo_radiacion == "Neutrones":
-        sigma = obtener_seccion_eficaz_neutrones(elemento, energia_mev)
-        return calcular_atenuacion_neutrones(I0, sigma, params['densidad_atomica'], x)
-    
-    elif tipo_radiacion == "Alfa":
-        return calcular_atenuacion_alfa(I0, energia_mev, params['densidad'], x)
-    
-    else:
-        # Por defecto, modelo exponencial
-        mu = 0.1
-        return I0 * np.exp(-mu * x)
+    return materiales.get(elemento, {
+        'densidad': 2.0,
+        'Z_efectivo': 10,
+        'sigma_neutrones': 5.0,
+        'densidad_atomica': 5e22,
+        'Color': '#808080'
+    })
 
 def obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion):
-    """Coeficiente de atenuación solo para fotones"""
+    """Coeficiente de atenuación para fotones"""
     coeficientes = {
         'Plomo': {
             'Gamma': {0.001: 150.0, 0.01: 26.0, 0.1: 59.7, 0.5: 1.71, 1.0: 0.776, 5.0: 0.202, 10.0: 0.102},
@@ -205,6 +164,10 @@ def obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion
         'Uranio': {
             'Gamma': {0.001: 220.0, 0.01: 45.0, 0.1: 85.3, 0.5: 2.43, 1.0: 1.091, 5.0: 0.252, 10.0: 0.125},
             'Rayos X': {0.001: 220.0, 0.01: 45.0, 0.1: 85.3}
+        },
+        'Boro': {
+            'Gamma': {0.001: 1.2, 0.01: 0.8, 0.1: 0.5, 0.5: 0.15, 1.0: 0.08, 5.0: 0.02, 10.0: 0.01},
+            'Rayos X': {0.001: 1.2, 0.01: 0.8, 0.1: 0.5}
         }
     }
     
@@ -224,16 +187,17 @@ def obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion
             log_energia = np.log10(energia_mev)
             return 10**np.interp(log_energia, log_energias, log_valores)
     
-    return 0.1
+    return 0.1  # Valor por defecto
 
 def obtener_seccion_eficaz_neutrones(elemento, energia_mev):
     """Sección eficaz para neutrones (barns)"""
-    # Valores aproximados
     secciones = {
         'Plomo': {0.000025: 0.17, 0.001: 0.3, 1.0: 5.0, 10.0: 3.0},
         'Acero': {0.000025: 2.5, 0.001: 2.8, 1.0: 3.0, 10.0: 2.0},
         'Hormigón': {0.000025: 4.0, 0.001: 5.0, 1.0: 8.0, 10.0: 6.0},
         'Agua': {0.000025: 40.0, 0.001: 20.0, 1.0: 5.0, 10.0: 3.0},
+        'Wolframio': {0.000025: 2.0, 0.001: 2.5, 1.0: 4.5, 10.0: 3.0},
+        'Uranio': {0.000025: 3.0, 0.001: 4.0, 1.0: 7.0, 10.0: 5.0},
         'Boro': {0.000025: 800.0, 0.001: 100.0, 1.0: 2.0, 10.0: 1.0}
     }
     
@@ -250,7 +214,28 @@ def obtener_seccion_eficaz_neutrones(elemento, energia_mev):
         else:
             return np.interp(energia_mev, energias_ordenadas, valores_ordenados)
     
-    return 5.0  # Valor por defecto
+    return 5.0
+
+def calcular_atenuacion_general(I0, elemento, energia_mev, tipo_radiacion, x):
+    """Función principal que selecciona el modelo correcto"""
+    params = obtener_parametros_material(elemento)
+    
+    if tipo_radiacion in ["Gamma", "Rayos X"]:
+        mu = obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion)
+        return calcular_atenuacion_fotones(I0, mu, x)
+    
+    elif tipo_radiacion == "Beta":
+        return calcular_atenuacion_beta(I0, energia_mev, params['densidad'], x)
+    
+    elif tipo_radiacion == "Neutrones":
+        sigma = obtener_seccion_eficaz_neutrones(elemento, energia_mev)
+        return calcular_atenuacion_neutrones(I0, sigma, params['densidad_atomica'], x)
+    
+    elif tipo_radiacion == "Alfa":
+        return calcular_atenuacion_alfa(I0, energia_mev, params['densidad'], x)
+    
+    else:
+        return I0  # Por defecto
 
 def calcular_capas_hvl_tvl(mu):
     """Calcula HVL y TVL - SÓLO VÁLIDO PARA FOTONES"""
@@ -260,93 +245,129 @@ def calcular_capas_hvl_tvl(mu):
         return hvl, tvl
     return 0, 0
 
+def generar_tabla_periodica():
+    """Genera DataFrame con información para tabla periódica interactiva"""
+    elementos = [
+        {'Simbolo': 'Pb', 'Nombre': 'Plomo', 'Z': 82, 'Grupo': 'Metales',
+         'Densidad': 11.34, 'Color': '#A0522D', 'Blindaje': 'Alto'},
+        {'Simbolo': 'W', 'Nombre': 'Wolframio', 'Z': 74, 'Grupo': 'Metales',
+         'Densidad': 19.25, 'Color': '#FFD700', 'Blindaje': 'Muy Alto'},
+        {'Simbolo': 'U', 'Nombre': 'Uranio', 'Z': 92, 'Grupo': 'Actinidos',
+         'Densidad': 19.10, 'Color': '#000000', 'Blindaje': 'Muy Alto'},
+        {'Simbolo': 'Ac', 'Nombre': 'Acero', 'Z': 'Mix', 'Grupo': 'Aleaciones',
+         'Densidad': 7.85, 'Color': '#778899', 'Blindaje': 'Medio'},
+        {'Simbolo': 'Con', 'Nombre': 'Hormigón', 'Z': 'Mix', 'Grupo': 'Compuestos',
+         'Densidad': 2.35, 'Color': '#A9A9A9', 'Blindaje': 'Medio'},
+        {'Simbolo': 'H2O', 'Nombre': 'Agua', 'Z': 'Mix', 'Grupo': 'Compuestos',
+         'Densidad': 1.00, 'Color': '#1E90FF', 'Blindaje': 'Bajo'},
+        {'Simbolo': 'B', 'Nombre': 'Boro', 'Z': 5, 'Grupo': 'Metaloides',
+         'Densidad': 2.34, 'Color': '#FFA500', 'Blindaje': 'Neutrones'}
+    ]
+    return pd.DataFrame(elementos)
+
 # ============================================================================
-# INTERFAZ STREAMLIT - ACTUALIZADA CON MODELOS CORRECTOS
+# INTERFAZ STREAMLIT - INTERFAZ ORIGINAL MEJORADA
 # ============================================================================
 
 def main():
-    st.title("☢️ Simulador de Blindaje Radiológico - Modelos Correctos")
+    # Título principal
+    st.title("☢️ Simulador Interactivo de Protección Radiológica")
     st.markdown("""
-    ### **IMPORTANTE:** Diferentes modelos físicos para cada tipo de radiación
-    *La ley exponencial solo es válida para fotones (Rayos X y Gamma)*
+    ### Modelos científicos correctos para cada tipo de radiación
+    *Trabajo de Física Nuclear - Protección Radiológica y Sistemas de Blindaje Avanzado*
     """)
-    
-    # Sidebar
+
+    # Sidebar para controles
     with st.sidebar:
         st.header("⚙️ Parámetros de Simulación")
-        
-        # Añadir partículas Alfa
+
+        # Selección de tipo de radiación (añadido Alfa)
         tipo_radiacion = st.selectbox(
             "Tipo de radiación:",
             ["Gamma", "Rayos X", "Beta", "Neutrones", "Alfa"],
             index=0
         )
-        
-        # Explicación de modelos
-        with st.expander("📖 Modelos utilizados por tipo"):
-            st.markdown("""
-            - **Fotones (Gamma/Rayos X):** Ley exponencial I(x) = I₀·e^(-μx)
-            - **Partículas Beta:** Modelo de alcance máximo (range)
-            - **Neutrones:** Atenuación por sección eficaz nuclear
-            - **Partículas Alfa:** Alcance corto fijo en material
-            """)
-        
-        # ENTRADA DE ENERGÍA
+
+        # Información sobre modelos
+        with st.expander("📖 Modelo utilizado"):
+            if tipo_radiacion in ["Gamma", "Rayos X"]:
+                st.info("**Ley exponencial:** I(x) = I₀·e^(-μx)")
+            elif tipo_radiacion == "Beta":
+                st.info("**Modelo de alcance máximo**")
+            elif tipo_radiacion == "Neutrones":
+                st.info("**Atenuación por sección eficaz nuclear**")
+            elif tipo_radiacion == "Alfa":
+                st.info("**Modelo de alcance corto fijo**")
+
+        # ENTRADA DE ENERGÍA FLEXIBLE
         st.markdown("### 🔋 Energía de la radiación")
         
         with st.expander("ℹ️ Rangos típicos"):
             st.markdown("""
-            - **Rayos X:** 1-300 keV
-            - **Gamma:** 0.01-10 MeV
-            - **Beta:** 0.1-10 MeV
-            - **Neutrones:** 0.001 eV - 20 MeV
-            - **Alfa:** 3-10 MeV
+            - **Rayos X**: 1-300 keV (diagnóstico)
+            - **Gamma**: 0.01-10 MeV
+            - **Beta**: 0.1-10 MeV  
+            - **Neutrones**: 0.001 eV - 20 MeV
+            - **Alfa**: 3-10 MeV
             """)
-        
-        # Parámetros según tipo
+
+        # Seleccionar unidad según tipo de radiación
         if tipo_radiacion == "Rayos X":
             unidad = st.radio("Unidad:", ["keV", "MeV"], horizontal=True)
             default_val = 50.0 if unidad == "keV" else 0.05
             min_val = 1.0 if unidad == "keV" else 0.001
             max_val = 300.0 if unidad == "keV" else 0.3
-        elif tipo_radiacion == "Gamma":
+            step_val = 1.0 if unidad == "keV" else 0.001
+            format_str = "%.0f" if unidad == "keV" else "%.3f"
+        else:
             unidad = "MeV"
-            default_val = 1.0
-            min_val = 0.001
-            max_val = 10.0
-        elif tipo_radiacion == "Beta":
-            unidad = "MeV"
-            default_val = 2.0
-            min_val = 0.01
-            max_val = 10.0
-        elif tipo_radiacion == "Neutrones":
-            unidad = "MeV"
-            default_val = 1.0
-            min_val = 0.000001
-            max_val = 20.0
-        elif tipo_radiacion == "Alfa":
-            unidad = "MeV"
-            default_val = 5.0
-            min_val = 3.0
-            max_val = 10.0
-        
+            if tipo_radiacion == "Gamma":
+                default_val = 1.0
+                min_val = 0.001
+                max_val = 10.0
+                step_val = 0.01
+                format_str = "%.3f"
+            elif tipo_radiacion == "Beta":
+                default_val = 2.0
+                min_val = 0.01
+                max_val = 10.0
+                step_val = 0.01
+                format_str = "%.2f"
+            elif tipo_radiacion == "Neutrones":
+                default_val = 1.0
+                min_val = 0.000001
+                max_val = 20.0
+                step_val = 0.000001
+                format_str = "%.6f"
+            elif tipo_radiacion == "Alfa":
+                default_val = 5.0
+                min_val = 3.0
+                max_val = 10.0
+                step_val = 0.1
+                format_str = "%.1f"
+
+        # Input numérico con la unidad seleccionada
         energia = st.number_input(
             f"Energía ({unidad}):",
             min_value=float(min_val),
             max_value=float(max_val),
             value=float(default_val),
-            step=0.01,
-            format="%.3f"
+            step=float(step_val),
+            format=format_str,
+            help=f"Energía de la radiación {tipo_radiacion}"
         )
-        
-        # Convertir a MeV
+
+        # Convertir todo a MeV internamente
         if unidad == "keV":
             energia_mev = energia / 1000.0
             energia_display = f"{energia} keV"
         else:
             energia_mev = energia
-            energia_display = f"{energia} MeV"
-        
+            if energia < 0.001:
+                energia_display = f"{energia*1000:.3f} keV" if energia >= 0.000001 else f"{energia*1e6:.2f} eV"
+            else:
+                energia_display = f"{energia} MeV"
+
         # Intensidad inicial
         I0 = st.number_input(
             "Intensidad inicial (partículas/s·cm²):",
@@ -356,233 +377,453 @@ def main():
             step=1e6,
             format="%.0e"
         )
-        
-        # Espesor máximo
+
+        # Espesor máximo para gráfica (ajustado por tipo de radiación)
         if tipo_radiacion == "Alfa":
-            espesor_max = st.slider("Espesor máximo (cm):", 0.001, 1.0, 0.1, 0.001)
+            espesor_max = st.slider(
+                "Espesor máximo (cm):",
+                min_value=0.001,
+                max_value=1.0,
+                value=0.1,
+                step=0.001,
+                help="Partículas alfa tienen alcance muy corto"
+            )
         elif tipo_radiacion == "Beta":
-            espesor_max = st.slider("Espesor máximo (cm):", 0.1, 10.0, 2.0, 0.1)
+            espesor_max = st.slider(
+                "Espesor máximo (cm):",
+                min_value=0.1,
+                max_value=10.0,
+                value=2.0,
+                step=0.1,
+                help="Partículas beta tienen alcance limitado"
+            )
         else:
-            espesor_max = st.slider("Espesor máximo (cm):", 1, 500, 100, 10)
-        
+            espesor_max = st.slider(
+                "Espesor máximo (cm):",
+                min_value=1,
+                max_value=500,
+                value=100,
+                step=10
+            )
+
         st.divider()
         st.header("📊 Opciones de Visualización")
         
         # Solo mostrar HVL/TVL para fotones
         if tipo_radiacion in ["Gamma", "Rayos X"]:
-            mostrar_hvl = st.checkbox("Mostrar HVL/TVL", value=True)
+            mostrar_hvl = st.checkbox("Mostrar capa de medio valor (HVL)", value=True)
+            mostrar_tvl = st.checkbox("Mostrar capa de décimo valor (TVL)", value=True)
         else:
             mostrar_hvl = False
+            mostrar_tvl = False
             st.info("HVL/TVL solo aplican a fotones")
         
-        escala_log = st.checkbox("Escala logarítmica en Y", value=True)
-    
-    # Pestañas principales
-    tab1, tab2, tab3 = st.tabs(["🏠 Explicación", "🎯 Simulación", "📚 Modelos"])
-    
+        escala_log = st.checkbox("Escala logarítmica en Y", value=(tipo_radiacion in ["Gamma", "Rayos X", "Neutrones"]))
+
+    # Contenido principal en pestañas
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "🏠 Inicio y Explicación",
+        "🎯 Tabla Periódica Interactiva", 
+        "🔍 Comparación de Materiales",
+        "📚 Información Teórica"
+    ])
+
     with tab1:
-        st.header("Modelos Correctos de Atenuación")
+        st.header("🏠 Bienvenido al Simulador de Blindaje Radiológico")
+        
+        st.markdown("""
+        ## 📋 ¿Qué puedes hacer con esta aplicación?
+        
+        Esta herramienta interactiva te permite simular la atenuación de diferentes tipos 
+        de radiación a través de diversos materiales de blindaje, aplicando **modelos físicamente correctos** 
+        para cada tipo de radiación.
+        """)
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("📖 Por qué diferentes modelos?")
+            st.subheader("🎯 **Funcionalidades principales:**")
             st.markdown("""
-            Cada tipo de radiación interactúa de manera diferente con la materia:
+            1. **Tabla Periódica Interactiva**
+               - Selecciona elementos y materiales de blindaje
+               - Visualiza propiedades clave (densidad, efectividad)
+               - Gráficas automáticas al seleccionar
             
-            **Fotones (X/Gamma):**
-            - Interacción por efecto fotoeléctrico, Compton, producción de pares
-            - Cada fotón tiene probabilidad constante de ser absorbido
-            - ✅ **Ley exponencial:** I(x) = I₀·e^(-μx)
+            2. **Simulación de Atenuación**
+               - Modelos correctos para cada tipo de radiación
+               - Para fotones: Ley exponencial con HVL/TVL
+               - Para otras radiaciones: Modelos específicos
             
-            **Partículas Beta (e⁻/e⁺):**
-            - Pérdida continua de energía por ionización
-            - Alcance máximo definido (range)
-            - ✗ **NO exponencial** - Modelo de alcance
+            3. **Comparación de Materiales**
+               - Compara múltiples materiales simultáneamente
+               - Análisis de efectividad relativa
             
-            **Neutrones:**
-            - Dispersión elástica/inelástica + captura nuclear
-            - Depende de sección eficaz σ(E)
-            - ✗ **NO exponencial simple** - Modelo nuclear
-            
-            **Partículas Alfa (α):**
-            - Pérdida densa de energía por ionización
-            - Alcance muy corto y fijo
-            - ✗ **NO exponencial** - Modelo de alcance corto
+            4. **Información Teórica**
+               - Fundamentos físicos de la atenuación
+               - Explicación de modelos matemáticos
             """)
         
         with col2:
-            st.subheader("🎯 Implicaciones para blindaje")
+            st.subheader("⚙️ **Cómo usar la aplicación:**")
             st.markdown("""
-            **Materiales efectivos por tipo:**
+            ### Paso 1: Configura los parámetros
+            - Usa la barra lateral para seleccionar:
+              - **Tipo de radiación** (Gamma, Beta, Neutrones, Rayos X, Alfa)
+              - **Energía** (con unidad apropiada: keV o MeV)
+              - **Intensidad inicial**
+              - **Opciones de visualización**
             
-            1. **Fotones:** Materiales densos con alto Z (Pb, W, U)
-            2. **Beta:** Materiales ligeros (plástico, Al) para minimizar radiación de frenado
-            3. **Neutrones:** Materiales con H (agua) para moderación + B/Cd para captura
-            4. **Alfa:** Cualquier material (incluso papel o aire)
+            ### Paso 2: Selecciona un material
+            - Ve a la pestaña "Tabla Periódica"
+            - Haz clic en cualquier elemento/material
             
-            **Espesores típicos:**
-            - Alfa: µm a mm
-            - Beta: mm a cm  
-            - Neutrones: cm a m
-            - Fotones: cm a m (dependiendo de energía)
+            ### Paso 3: Explora y compara
+            - Observa la curva de atenuación
+            - Compara con otros materiales
+            - Ajusta espesores y parámetros
             """)
+        
+        st.divider()
+        
+        st.subheader("📊 **Modelos científicos implementados:**")
+        
+        datos_modelos = {
+            "Tipo de radiación": ["Fotones (Gamma/Rayos X)", "Partículas Beta", "Neutrones", "Partículas Alfa"],
+            "Modelo físico": [
+                "Ley de atenuación exponencial: I(x) = I₀·e^(-μx)",
+                "Modelo de alcance máximo (range)",
+                "Atenuación por sección eficaz nuclear",
+                "Modelo de alcance corto fijo"
+            ],
+            "Parámetros clave": [
+                "μ (coeficiente de atenuación), HVL, TVL",
+                "Energía máxima, densidad del material",
+                "Sección eficaz σ, densidad atómica",
+                "Energía, densidad del material"
+            ]
+        }
+        
+        st.dataframe(pd.DataFrame(datos_modelos), width='stretch')
         
         st.warning("""
-        ⚠️ **Importante:** Las simulaciones anteriores usaban modelo exponencial para todo. 
-        Esta versión usa modelos físicamente correctos para cada tipo de radiación.
+        ⚠️ **Importante científico:** 
+        - La ley exponencial **solo es válida** para fotones (Rayos X y Gamma)
+        - Para otras radiaciones se utilizan modelos físicos específicos
+        - Esta aplicación usa modelos simplificados para fines educativos
         """)
-    
+
     with tab2:
-        st.header(f"Simulación para {tipo_radiacion}")
-        
-        # Tabla periódica simplificada
-        elementos = ["Plomo", "Acero", "Hormigón", "Agua", "Wolframio", "Uranio", "Boro"]
-        
-        col_sel1, col_sel2 = st.columns([3, 1])
-        
-        with col_sel1:
-            elemento = st.selectbox("Selecciona material:", elementos, index=0)
-        
-        with col_sel2:
-            espesor = st.number_input(
-                "Espesor (cm):",
-                min_value=0.0,
-                max_value=float(espesor_max),
-                value=min(1.0, float(espesor_max)),
-                step=0.01,
-                key="espesor_sim"
+        st.header("Tabla Periódica para Blindaje Radiológico")
+
+        # Generar tabla periódica
+        df_elementos = generar_tabla_periodica()
+
+        # Mostrar tabla periódica como cuadrícula interactiva
+        cols = st.columns(7)
+
+        for idx, row in df_elementos.iterrows():
+            col_idx = idx % 7
+            with cols[col_idx]:
+                # Botón para cada elemento con color personalizado
+                if st.button(
+                    f"**{row['Simbolo']}**\n{row['Nombre']}",
+                    key=f"elem_{row['Simbolo']}",
+                    help=f"Z={row['Z']}, ρ={row['Densidad']} g/cm³",
+                ):
+                    # Almacenar elemento seleccionado en session state
+                    st.session_state['elemento_seleccionado'] = row['Simbolo']
+
+                # Información adicional en tooltip
+                st.caption(f"ρ={row['Densidad']} g/cm³")
+
+        st.divider()
+
+        # Si hay elemento seleccionado, mostrar gráfica y controles AUTOMÁTICAMENTE
+        if 'elemento_seleccionado' in st.session_state:
+            elem = st.session_state['elemento_seleccionado']
+            info = df_elementos[df_elementos['Simbolo'] == elem].iloc[0]
+            nombre_elemento = info['Nombre']
+            color_elemento = info['Color']
+            
+            st.subheader(f"Simulación para {nombre_elemento}")
+            
+            # Información del elemento
+            col_info1, col_info2, col_info3 = st.columns(3)
+            
+            with col_info1:
+                st.metric("Elemento", nombre_elemento)
+                st.metric("Densidad", f"{info['Densidad']} g/cm³")
+            
+            with col_info2:
+                st.metric("Grupo", info['Grupo'])
+                st.metric("Efectividad", info['Blindaje'])
+            
+            with col_info3:
+                params = obtener_parametros_material(nombre_elemento)
+                
+                if tipo_radiacion in ["Gamma", "Rayos X"]:
+                    mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                    hvl, tvl = calcular_capas_hvl_tvl(mu)
+                    st.metric("μ (cm⁻¹)", f"{mu:.4f}")
+                    st.metric("HVL", f"{hvl:.1f} cm")
+                elif tipo_radiacion == "Neutrones":
+                    sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
+                    st.metric("σ (barns)", f"{sigma:.1f}")
+                    st.metric("Densidad atómica", f"{params['densidad_atomica']:.1e}")
+                else:
+                    st.metric("Densidad", f"{params['densidad']} g/cm³")
+                    if tipo_radiacion == "Alfa":
+                        alcance_aire = 0.3 * energia_mev ** 1.5
+                        alcance_material = alcance_aire * (0.001225 / params['densidad'])
+                        st.metric("Alcance aprox.", f"{alcance_material*1000:.1f} mm")
+                    elif tipo_radiacion == "Beta":
+                        if energia_mev < 0.8:
+                            alcance_gcm2 = 0.15 * energia_mev ** 1.5
+                        else:
+                            alcance_gcm2 = 0.5 * energia_mev
+                        alcance_cm = alcance_gcm2 / params['densidad']
+                        st.metric("Alcance aprox.", f"{alcance_cm:.2f} cm")
+            
+            # Slider para espesor que se actualiza automáticamente
+            st.subheader("Configurar blindaje")
+            
+            col_espesor1, col_espesor2 = st.columns([3, 1])
+            
+            with col_espesor1:
+                espesor = st.slider(
+                    f"Espesor de {nombre_elemento} (cm):",
+                    min_value=0.0,
+                    max_value=float(espesor_max),
+                    value=min(0.1 if tipo_radiacion == "Alfa" else 10.0, float(espesor_max)),
+                    step=0.001 if tipo_radiacion == "Alfa" else 0.5,
+                    key=f"espesor_{elem}"
+                )
+            
+            with col_espesor2:
+                # Calcular atenuación automáticamente
+                I_final = calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, espesor)
+                atenuacion = (1 - I_final/I0) * 100 if I0 > 0 else 0
+                
+                st.metric("Atenuación", f"{atenuacion:.1f}%")
+                st.metric("I final", f"{I_final:.2e}")
+            
+            # Gráfica de atenuación AUTOMÁTICA
+            espesores = np.linspace(0, espesor_max, 500)
+            intensidades = [calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, x) for x in espesores]
+            
+            # Crear gráfica con Plotly
+            fig = go.Figure()
+            
+            # Curva principal
+            fig.add_trace(go.Scatter(
+                x=espesores,
+                y=intensidades,
+                mode='lines',
+                name=f'{nombre_elemento}',
+                line=dict(color=color_elemento, width=3),
+                hovertemplate="Espesor: %{x:.3f} cm<br>Intensidad: %{y:.2e}<extra></extra>"
+            ))
+            
+            # Línea vertical para el espesor seleccionado
+            fig.add_vline(
+                x=espesor,
+                line_dash="solid",
+                line_color="green",
+                line_width=2,
+                annotation_text=f"Espesor seleccionado: {espesor:.3f} cm",
+                annotation_position="top left"
             )
-        
-        # Calcular atenuación
-        I_final = calcular_atenuacion_general(I0, elemento, energia_mev, tipo_radiacion, espesor)
-        atenuacion = (1 - I_final/I0) * 100 if I0 > 0 else 0
-        
-        # Gráfica
-        espesores = np.linspace(0, espesor_max, 300)
-        intensidades = [calcular_atenuacion_general(I0, elemento, energia_mev, tipo_radiacion, x) for x in espesores]
-        
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=espesores,
-            y=intensidades,
-            mode='lines',
-            name=f'{elemento}',
-            line=dict(width=3),
-            hovertemplate="Espesor: %{x:.3f} cm<br>Intensidad: %{y:.2e}<extra></extra>"
-        ))
-        
-        # Línea para espesor seleccionado
-        fig.add_vline(
-            x=espesor,
-            line_dash="solid",
-            line_color="green",
-            line_width=2,
-            annotation_text=f"{espesor} cm",
-            annotation_position="top left"
-        )
-        
-        fig.update_layout(
-            title=f"Atenuación de {tipo_radiacion} ({energia_display}) en {elemento}",
-            xaxis_title="Espesor (cm)",
-            yaxis_title="Intensidad transmitida (partículas/s·cm²)",
-            template='plotly_white',
-            height=500
-        )
-        
-        if escala_log:
-            fig.update_yaxes(type="log", exponentformat='power')
-        
-        st.plotly_chart(fig, width='stretch')
-        
-        # Resultados
-        col_res1, col_res2, col_res3 = st.columns(3)
-        
-        with col_res1:
-            st.metric("Intensidad inicial", f"{I0:.2e}")
-            st.metric("Energía", energia_display)
-        
-        with col_res2:
-            st.metric("Intensidad final", f"{I_final:.2e}")
-            st.metric("Atenuación", f"{atenuacion:.1f}%")
-        
-        with col_res3:
-            params = obtener_parametros_material(elemento, energia_mev, tipo_radiacion)
-            st.metric("Densidad", f"{params['densidad']} g/cm³")
             
-            if tipo_radiacion in ["Gamma", "Rayos X"]:
-                mu = obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion)
-                hvl, tvl = calcular_capas_hvl_tvl(mu)
-                st.metric("HVL", f"{hvl:.2f} cm")
-            elif tipo_radiacion == "Neutrones":
-                sigma = obtener_seccion_eficaz_neutrones(elemento, energia_mev)
-                st.metric("σ (barns)", f"{sigma:.1f}")
-        
-        # Información específica del modelo
-        st.subheader("📊 Información del modelo utilizado")
-        
-        if tipo_radiacion in ["Gamma", "Rayos X"]:
-            mu = obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion)
-            st.markdown(f"""
-            **Modelo exponencial:** I(x) = I₀·e^(-μx)
-            - μ = {mu:.4f} cm⁻¹
-            - HVL = {calcular_capas_hvl_tvl(mu)[0]:.2f} cm
-            - TVL = {calcular_capas_hvl_tvl(mu)[1]:.2f} cm
-            """)
-        
-        elif tipo_radiacion == "Beta":
-            params = obtener_parametros_material(elemento, energia_mev, tipo_radiacion)
-            # Calcular alcance aproximado
-            if energia_mev < 0.8:
-                alcance_gcm2 = 0.15 * energia_mev ** 1.5
-            else:
-                alcance_gcm2 = 0.5 * energia_mev
+            # Punto en la curva para el espesor seleccionado
+            fig.add_trace(go.Scatter(
+                x=[espesor],
+                y=[I_final],
+                mode='markers',
+                name=f'I = {I_final:.2e}',
+                marker=dict(size=12, color='green'),
+                hovertemplate=f"Espesor: {espesor:.3f} cm<br>Intensidad: {I_final:.2e}<extra></extra>"
+            ))
             
-            alcance_cm = alcance_gcm2 / params['densidad']
+            # Líneas de HVL y TVL (solo para fotones)
+            if tipo_radiacion in ["Gamma", "Rayos X"] and mostrar_hvl:
+                mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                hvl, _ = calcular_capas_hvl_tvl(mu)
+                if hvl > 0 and hvl <= espesor_max:
+                    fig.add_vline(
+                        x=hvl,
+                        line_dash="dash",
+                        line_color="red",
+                        annotation_text=f"HVL = {hvl:.2f} cm",
+                        annotation_position="top right"
+                    )
             
-            st.markdown(f"""
-            **Modelo de alcance para beta:**
-            - Energía máxima: {energia_mev:.3f} MeV
-            - Alcance aproximado: {alcance_cm:.3f} cm
-            - Densidad material: {params['densidad']} g/cm³
-            - Atenuación completa a {alcance_cm:.3f} cm
-            """)
+            if tipo_radiacion in ["Gamma", "Rayos X"] and mostrar_tvl:
+                mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                _, tvl = calcular_capas_hvl_tvl(mu)
+                if tvl > 0 and tvl <= espesor_max:
+                    fig.add_vline(
+                        x=tvl,
+                        line_dash="dot",
+                        line_color="blue",
+                        annotation_text=f"TVL = {tvl:.2f} cm",
+                        annotation_position="top right"
+                    )
             
-            if espesor >= alcance_cm:
-                st.success("✅ Atenuación completa alcanzada")
-            else:
-                st.info(f"ℹ️ {((alcance_cm - espesor)/alcance_cm*100):.1f}% del alcance restante")
-        
-        elif tipo_radiacion == "Neutrones":
-            sigma = obtener_seccion_eficaz_neutrones(elemento, energia_mev)
-            params = obtener_parametros_material(elemento, energia_mev, tipo_radiacion)
+            # Configurar layout
+            fig.update_layout(
+                title=f'Atenuación de {tipo_radiacion} ({energia_display}) en {nombre_elemento}',
+                xaxis_title='Espesor del blindaje (cm)',
+                yaxis_title='Intensidad transmitida (partículas/s·cm²)',
+                hovermode='x unified',
+                template='plotly_white',
+                height=500
+            )
             
-            st.markdown(f"""
-            **Modelo de sección eficaz:**
-            - Sección eficaz total: σ = {sigma:.1f} barns
-            - Densidad atómica: N ≈ {params['densidad_atomica']:.1e} átomos/cm³
-            - Longitud de atenuación: λ = 1/(Nσ) ≈ {1/(params['densidad_atomica']*sigma*1e-24):.2f} cm
-            """)
-        
-        elif tipo_radiacion == "Alfa":
-            params = obtener_parametros_material(elemento, energia_mev, tipo_radiacion)
-            alcance_aire = 0.3 * energia_mev ** 1.5
-            alcance_material = alcance_aire * (0.001225 / params['densidad'])
+            if escala_log:
+                fig.update_yaxes(type="log", exponentformat='power')
             
-            st.markdown(f"""
-            **Modelo de alcance para alfa:**
-            - Energía: {energia_mev:.2f} MeV
-            - Alcance en aire: {alcance_aire:.3f} cm
-            - Alcance en {elemento}: {alcance_material:.5f} cm
-            - Densidad material: {params['densidad']} g/cm³
-            """)
+            st.plotly_chart(fig, width='stretch')
             
-            if espesor >= alcance_material:
-                st.success("✅ Atenuación completa alcanzada")
-            else:
-                st.info(f"ℹ️ {((alcance_material - espesor)/alcance_material*100):.1f}% del alcance restante")
-    
+            # Información detallada
+            st.subheader("📊 Resultados detallados")
+            
+            col_det1, col_det2, col_det3 = st.columns(3)
+            
+            with col_det1:
+                st.metric("Energía", energia_display)
+                st.metric("Intensidad inicial (I₀)", f"{I0:.2e}")
+                st.metric("Tipo de radiación", tipo_radiacion)
+            
+            with col_det2:
+                st.metric("Intensidad final (I)", f"{I_final:.2e}")
+                st.metric("Atenuación", f"{atenuacion:.2f}%")
+                st.metric("Transmisión (I/I₀)", f"{I_final/I0:.2e}")
+            
+            with col_det3:
+                params = obtener_parametros_material(nombre_elemento)
+                st.metric("Densidad material", f"{params['densidad']} g/cm³")
+                
+                if tipo_radiacion in ["Gamma", "Rayos X"]:
+                    mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                    hvl, tvl = calcular_capas_hvl_tvl(mu)
+                    st.metric("Nº HVLs en espesor", f"{espesor/hvl:.2f}" if hvl > 0 else "0")
+                elif tipo_radiacion == "Beta":
+                    if energia_mev < 0.8:
+                        alcance_gcm2 = 0.15 * energia_mev ** 1.5
+                    else:
+                        alcance_gcm2 = 0.5 * energia_mev
+                    alcance_cm = alcance_gcm2 / params['densidad']
+                    st.metric("% del alcance", f"{(espesor/alcance_cm*100):.1f}%" if alcance_cm > 0 else "0%")
+                elif tipo_radiacion == "Alfa":
+                    alcance_aire = 0.3 * energia_mev ** 1.5
+                    alcance_material = alcance_aire * (0.001225 / params['densidad'])
+                    st.metric("% del alcance", f"{(espesor/alcance_material*100):.1f}%" if alcance_material > 0 else "0%")
+
     with tab3:
+        st.header("Comparación de Materiales de Blindaje")
+        
+        # Generar tabla periódica
+        df_elementos = generar_tabla_periodica()
+        
+        # Selección múltiple de materiales
+        materiales_seleccionados = st.multiselect(
+            "Selecciona materiales para comparar:",
+            df_elementos['Nombre'].tolist(),
+            default=['Plomo', 'Acero', 'Hormigón', 'Agua']
+        )
+
+        if materiales_seleccionados:
+            # Crear gráfica comparativa
+            fig_comparativa = go.Figure()
+
+            espesores = np.linspace(0, espesor_max, 300)
+
+            for material in materiales_seleccionados:
+                # Obtener color del elemento
+                color = df_elementos[df_elementos['Nombre'] == material]['Color'].iloc[0]
+                
+                # Calcular curva para este material
+                intensidades = [calcular_atenuacion_general(I0, material, energia_mev, tipo_radiacion, x) for x in espesores]
+                
+                # Información adicional para el tooltip
+                params = obtener_parametros_material(material)
+                info_extra = f"Densidad: {params['densidad']} g/cm³"
+                
+                if tipo_radiacion in ["Gamma", "Rayos X"]:
+                    mu = obtener_coeficiente_atenuacion_fotones(material, energia_mev, tipo_radiacion)
+                    info_extra += f"<br>μ={mu:.3f} cm⁻¹"
+                elif tipo_radiacion == "Neutrones":
+                    sigma = obtener_seccion_eficaz_neutrones(material, energia_mev)
+                    info_extra += f"<br>σ={sigma:.1f} barns"
+
+                fig_comparativa.add_trace(go.Scatter(
+                    x=espesores,
+                    y=intensidades,
+                    mode='lines',
+                    name=material,
+                    line=dict(color=color, width=2),
+                    hovertemplate=f"{material}<br>{info_extra}<br>Espesor: %{{x:.3f}} cm → Intensidad: %{{y:.2e}}<extra></extra>"
+                ))
+
+            # Configurar layout
+            fig_comparativa.update_layout(
+                title=f'Comparación de atenuación para {tipo_radiacion} ({energia_display})',
+                xaxis_title='Espesor (cm)',
+                yaxis_title='Intensidad transmitida (partículas/s·cm²)',
+                hovermode='x unified',
+                template='plotly_white',
+                height=500
+            )
+
+            if escala_log:
+                fig_comparativa.update_yaxes(type="log", exponentformat='power')
+
+            st.plotly_chart(fig_comparativa, width='stretch')
+
+            # Tabla comparativa
+            st.subheader("📋 Tabla comparativa")
+
+            datos_comparacion = []
+            for material in materiales_seleccionados:
+                params = obtener_parametros_material(material)
+                
+                # Calcular atenuación a espesor máximo
+                I_final = calcular_atenuacion_general(I0, material, energia_mev, tipo_radiacion, espesor_max)
+                atenuacion = (1 - I_final/I0) * 100 if I0 > 0 else 0
+                
+                # Información específica por tipo de radiación
+                if tipo_radiacion in ["Gamma", "Rayos X"]:
+                    mu = obtener_coeficiente_atenuacion_fotones(material, energia_mev, tipo_radiacion)
+                    hvl, tvl = calcular_capas_hvl_tvl(mu)
+                    info_especifico = f"μ={mu:.3f} cm⁻¹, HVL={hvl:.2f} cm"
+                elif tipo_radiacion == "Beta":
+                    if energia_mev < 0.8:
+                        alcance_gcm2 = 0.15 * energia_mev ** 1.5
+                    else:
+                        alcance_gcm2 = 0.5 * energia_mev
+                    alcance_cm = alcance_gcm2 / params['densidad']
+                    info_especifico = f"Alcance≈{alcance_cm:.2f} cm"
+                elif tipo_radiacion == "Neutrones":
+                    sigma = obtener_seccion_eficaz_neutrones(material, energia_mev)
+                    info_especifico = f"σ={sigma:.1f} barns"
+                elif tipo_radiacion == "Alfa":
+                    alcance_aire = 0.3 * energia_mev ** 1.5
+                    alcance_material = alcance_aire * (0.001225 / params['densidad'])
+                    info_especifico = f"Alcance≈{alcance_material*1000:.1f} mm"
+                else:
+                    info_especifico = "-"
+
+                datos_comparacion.append({
+                    'Material': material,
+                    'Densidad (g/cm³)': params['densidad'],
+                    'Aten. a {espesor_max}cm': f"{atenuacion:.1f}%",
+                    'Info específica': info_especifico
+                })
+
+            df_comparacion = pd.DataFrame(datos_comparacion)
+            st.dataframe(df_comparacion, width='stretch')
+
+    with tab4:
         st.header("📚 Detalles de los Modelos Matemáticos")
         
         col_mod1, col_mod2 = st.columns(2)
