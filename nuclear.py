@@ -418,7 +418,7 @@ def main():
             mostrar_tvl = False
             st.info("HVL/TVL solo aplican a fotones")
         
-        escala_log = st.checkbox("Escala logarítmica en Y", value=(tipo_radiacion in ["Gamma", "Rayos X", "Neutrones"]))
+        escala_log = st.checkbox("Escala logarítmica en Y", value=False)
 
     # Contenido principal en pestañas
     tab1, tab2, tab3, tab4 = st.tabs([
