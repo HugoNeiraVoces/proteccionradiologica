@@ -574,29 +574,30 @@ def main():
             
             with col_info3:
                 params = obtener_parametros_material(nombre_elemento)
+                st.metric("Densidad material", f"{params['densidad']} g/cm³")
                 
                 if tipo_radiacion in ["Gamma", "Rayos X"]:
                     mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
                     hvl, tvl = calcular_capas_hvl_tvl(mu)
-                    st.metric("μ (cm⁻¹)", f"{mu:.4f}")
-                    st.metric("HVL", f"{hvl:.1f} cm")
+                    st.metric("Espesor HVL", f"{hvl:.2f} cm")
+                    st.metric("Espesor TVL", f"{tvl:.2f} cm")
+                elif tipo_radiacion == "Beta":
+                    if energia_mev < 0.8:
+                        alcance_gcm2 = 0.15 * energia_mev ** 1.5
+                    else:
+                        alcance_gcm2 = 0.5 * energia_mev
+                    alcance_cm = alcance_gcm2 / params['densidad']
+                    st.metric("Alcance aproximado", f"{alcance_cm:.2f} cm")
+                    st.metric("% del alcance usado", f"{(espesor/alcance_cm*100):.1f}%" if alcance_cm > 0 else "0%")
+                elif tipo_radiacion == "Alfa":
+                    alcance_aire = 0.3 * energia_mev ** 1.5
+                    alcance_material = alcance_aire * (0.001225 / params['densidad'])
+                    st.metric("Alcance aproximado", f"{alcance_material*1000:.1f} mm")
+                    st.metric("% del alcance usado", f"{(espesor/alcance_material*100):.1f}%" if alcance_material > 0 else "0%")
                 elif tipo_radiacion == "Neutrones":
                     sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
-                    st.metric("σ (barns)", f"{sigma:.1f}")
-                    st.metric("Densidad atómica", f"{params['densidad_atomica']:.1e}")
-                else:
-                    st.metric("Densidad", f"{params['densidad']} g/cm³")
-                    if tipo_radiacion == "Alfa":
-                        alcance_aire = 0.3 * energia_mev ** 1.5
-                        alcance_material = alcance_aire * (0.001225 / params['densidad'])
-                        st.metric("Alcance aprox.", f"{alcance_material*1000:.1f} mm")
-                    elif tipo_radiacion == "Beta":
-                        if energia_mev < 0.8:
-                            alcance_gcm2 = 0.15 * energia_mev ** 1.5
-                        else:
-                            alcance_gcm2 = 0.5 * energia_mev
-                        alcance_cm = alcance_gcm2 / params['densidad']
-                        st.metric("Alcance aprox.", f"{alcance_cm:.2f} cm")
+                    st.metric("Sección eficaz (σ)", f"{sigma:.1f} barns")
+                    st.metric("Long. atenuación", f"{1/(params['densidad_atomica']*sigma*1e-24):.1f} cm")
             
             # Slider para espesor que se actualiza automáticamente
             st.subheader("Configurar blindaje")
