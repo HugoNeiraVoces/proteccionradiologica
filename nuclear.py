@@ -79,6 +79,13 @@ def calcular_atenuacion_alfa(I0, energia_mev, densidad_material, x):
 def obtener_parametros_material(elemento):
     """Obtiene parámetros físicos del material"""
     materiales = {
+        'Aire': {
+            'densidad': 0.001225,
+            'Z_efectivo': 7.64,  # Promedio ponderado (78% N₂, 21% O₂, 1% Ar)
+            'sigma_neutrones': 0.2,  # Baja sección eficaz
+            'densidad_atomica': 5.0e19,  # Mucho menor que sólidos
+            'Color': '#87CEEB'
+        },
         'Plomo': {
             'densidad': 11.34,
             'Z_efectivo': 82,
@@ -140,7 +147,11 @@ def obtener_parametros_material(elemento):
 
 def obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion):
     """Coeficiente de atenuación para fotones"""
-    coeficientes = {
+    coeficientes = {       
+        'Aire': {
+            'Gamma': {0.001: 0.0005, 0.01: 0.0008, 0.1: 0.002, 0.5: 0.008, 1.0: 0.015, 5.0: 0.006, 10.0: 0.003},
+            'Rayos X': {0.001: 0.0005, 0.01: 0.0008, 0.1: 0.002}
+        },
         'Plomo': {
             'Gamma': {0.001: 150.0, 0.01: 26.0, 0.1: 59.7, 0.5: 1.71, 1.0: 0.776, 5.0: 0.202, 10.0: 0.102},
             'Rayos X': {0.001: 150.0, 0.01: 26.0, 0.1: 59.7}
@@ -192,6 +203,7 @@ def obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion
 def obtener_seccion_eficaz_neutrones(elemento, energia_mev):
     """Sección eficaz para neutrones (barns)"""
     secciones = {
+        'Aire': {0.000025: 0.5, 0.001: 0.3, 1.0: 0.2, 10.0: 0.1},
         'Plomo': {0.000025: 0.17, 0.001: 0.3, 1.0: 5.0, 10.0: 3.0},
         'Acero': {0.000025: 2.5, 0.001: 2.8, 1.0: 3.0, 10.0: 2.0},
         'Hormigón': {0.000025: 4.0, 0.001: 5.0, 1.0: 8.0, 10.0: 6.0},
@@ -248,6 +260,8 @@ def calcular_capas_hvl_tvl(mu):
 def generar_tabla_periodica():
     """Genera DataFrame con información para tabla periódica interactiva"""
     elementos = [
+        {'Simbolo': 'Air', 'Nombre': 'Aire', 'Z': 'Mix', 'Grupo': 'Gases',
+         'Densidad': 0.001225, 'Color': '#87CEEB', 'Blindaje': 'Muy Bajo'},
         {'Simbolo': 'Pb', 'Nombre': 'Plomo', 'Z': 82, 'Grupo': 'Metales',
          'Densidad': 11.34, 'Color': '#A0522D', 'Blindaje': 'Alto'},
         {'Simbolo': 'W', 'Nombre': 'Wolframio', 'Z': 74, 'Grupo': 'Metales',
@@ -886,4 +900,6 @@ def main():
         """)
 
 if __name__ == "__main__":
+    if 'elemento_seleccionado' not in st.session_state:
+        st.session_state['elemento_seleccionado'] = 'Air'
     main()
