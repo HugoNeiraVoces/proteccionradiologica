@@ -629,6 +629,12 @@ def main():
                 st.markdown("#### ⚙️ Parámetros entrada")
                 st.metric("Energía", energia_display)
                 st.metric("Intensidad inicial (I₀)", f"{I0:.2e}")
+
+                # Mostrar sección eficaz solo para neutrones
+                if tipo_radiacion == "Neutrones":
+                    sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
+                    st.metric("Sección eficaz σ", f"{sigma:.1f} barns")
+                    st.caption("1 barn = 10⁻²⁴ cm²")
             
             with col_fila2_2:
                 st.markdown("#### 📊 Resultados principales")
@@ -651,8 +657,21 @@ def main():
                     st.metric("Alcance total", f"{alcance_material*1000:.1f} mm")
                 elif tipo_radiacion == "Neutrones":
                     sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
-                    st.metric("Sección eficaz σ", f"{sigma:.1f} barns")
-            
+                    sigma_macroscopica = params['densidad_atomica'] * sigma * 1e-24  # cm⁻¹
+                    
+                    if sigma_macroscopica > 0:
+                        # Calcular HVL y TVL equivalentes
+                        hvl = np.log(2) / sigma_macroscopica
+                        tvl = np.log(10) / sigma_macroscopica
+                        
+                        st.metric("HVL (equivalente)", f"{hvl:.1f} cm")
+                        st.metric("TVL (equivalente)", f"{tvl:.1f} cm")
+                        
+                        # Aclaración como caption
+                        st.caption("⚠️ HVL/TVL 'equivalentes' - σ varía con energía")
+                    else:
+                        st.metric("HVL (equivalente)", "∞ cm")
+                        st.metric("TVL (equivalente)", "∞ cm")
             
             # ============================================
             # SLIDER DEL ESPESOR - AHORA SOLO Y CENTRADO
@@ -938,6 +957,19 @@ def main():
            - Radiación secundaria (frenado, rayos X característicos)
            - Dispersión múltiple
            - Activación del material de blindaje
+        """)
+
+        st.subheader("ℹ️ Nota sobre neutrones")
+        st.markdown("""
+        Para neutrones, el concepto de **HVL y TVL es 'equivalente'** porque:
+        
+        1. **σ varía con energía**: La sección eficaz nuclear cambia drásticamente
+        2. **Moderación**: Los neutrones pierden energía en colisiones
+        3. **Dispersión múltiple**: No es un simple camino directo
+        
+        En esta simulación usamos:  
+        **HVL(eq) = ln(2)/Σ** y **TVL(eq) = ln(10)/Σ**  
+        donde **Σ = N·σ** (sección eficaz macroscópica)
         """)
 
 if __name__ == "__main__":
