@@ -59,22 +59,29 @@ def calcular_atenuacion_neutrones(I0, sigma_total, densidad_atomica, x):
 
 def calcular_atenuacion_alfa(I0, energia_mev, densidad_material, x):
     """
-    Modelo para partículas alfa - alcance muy corto
+    Modelo para partículas alfa - solo pérdida de energía, no atenuación real
+    Las partículas alfa rara vez se atenúan, solo pierden energía y se detienen
     """
     if energia_mev <= 0:
         return I0
     
-    # Alcance en aire (cm)
-    alcance_aire = 0.3 * energia_mev ** 1.5
+    # Alcance en aire (cm) - fórmula aproximada
+    if energia_mev < 4:
+        alcance_aire = 0.56 * energia_mev ** 1.5  # Más preciso para bajas energías
+    else:
+        alcance_aire = 1.24 * energia_mev - 2.62  # Más preciso para altas energías
+    
     densidad_aire = 0.001225
     alcance_material = alcance_aire * (densidad_aire / densidad_material)
     
-    # Si el espesor es mayor que el alcance, intensidad = 0
+    # Las partículas alfa prácticamente NO se atenúan hasta el final de su alcance
+    # Solo consideramos que se detienen completamente al alcanzar el alcance
     if x >= alcance_material:
         return 0.0
     
-    fraccion = x / alcance_material
-    return I0 * (1 - fraccion ** 3)
+    # Para x < alcance: prácticamente sin atenuación (pérdidas por ionización, no atenuación)
+    # Aproximamos que la intensidad se mantiene constante hasta el alcance
+    return I0
 
 def obtener_parametros_material(elemento):
     """Obtiene parámetros físicos del material"""
