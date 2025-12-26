@@ -421,7 +421,7 @@ def main():
         elif tipo_radiacion == "Neutrones":
             espesor_max = st.slider(
                 "Espesor máximo (cm):",
-                min_value=1,
+                min_value=1.0,
                 max_value=10000.0,  # Aumentado a 100 m
                 value=1000.0,
                 step=10.0,
@@ -430,7 +430,7 @@ def main():
         else:  # Gamma y Rayos X
             espesor_max = st.slider(
                 "Espesor máximo (cm):",
-                min_value=1,
+                min_value=1.0,
                 max_value=5000.0,  # Aumentado a 50 m
                 value=500.0,
                 step=10.0,
