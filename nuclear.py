@@ -83,7 +83,7 @@ def obtener_parametros_material(elemento):
             'densidad': 0.001225,
             'Z_efectivo': 7.64,  # Promedio ponderado (78% N₂, 21% O₂, 1% Ar)
             'sigma_neutrones': 0.2,  # Baja sección eficaz
-            'densidad_atomica': 5.0e19,  # Mucho menor que sólidos
+            'densidad_atomica': 5.0e22,  # Mucho menor que sólidos
             'Color': '#87CEEB'
         },
         'Plomo': {
