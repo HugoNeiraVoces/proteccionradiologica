@@ -440,14 +440,25 @@ def main():
         st.divider()
         st.header("📊 Opciones de Visualización")
         
-        # Solo mostrar HVL/TVL para fotones
-        if tipo_radiacion in ["Gamma", "Rayos X"]:
-            mostrar_hvl = st.checkbox("Mostrar capa de medio valor (HVL)", value=True)
-            mostrar_tvl = st.checkbox("Mostrar capa de décimo valor (TVL)", value=True)
+        # Mostrar HVL/TVL para fotones y neutrones (pero con nombres adecuados)
+        if tipo_radiacion in ["Gamma", "Rayos X", "Neutrones"]:
+            if tipo_radiacion == "Neutrones":
+                etiqueta_hvl = "Mostrar HVL equivalente"
+                etiqueta_tvl = "Mostrar TVL equivalente"
+                ayuda_hvl = "Capa de medio valor equivalente para neutrones (basado en sección eficaz)"
+                ayuda_tvl = "Capa de décimo valor equivalente para neutrones (basado en sección eficaz)"
+            else:
+                etiqueta_hvl = "Mostrar capa de medio valor (HVL)"
+                etiqueta_tvl = "Mostrar capa de décimo valor (TVL)"
+                ayuda_hvl = "Ley exponencial exacta para fotones"
+                ayuda_tvl = "Ley exponencial exacta para fotones"
+            
+            mostrar_hvl = st.checkbox(etiqueta_hvl, value=True, help=ayuda_hvl)
+            mostrar_tvl = st.checkbox(etiqueta_tvl, value=True, help=ayuda_tvl)
         else:
             mostrar_hvl = False
             mostrar_tvl = False
-            st.info("HVL/TVL solo aplican a fotones")
+            st.info("HVL/TVL solo aplican a fotones y su equivalene solo en neutrones")
         
         escala_log = st.checkbox("Escala logarítmica en Y", value=False)
 
@@ -753,28 +764,44 @@ def main():
                 hovertemplate=f"Espesor: {espesor:.3f} cm<br>Intensidad: {I_final:.2e}<extra></extra>"
             ))
             
-            # Líneas de HVL y TVL (solo para fotones)
-            if tipo_radiacion in ["Gamma", "Rayos X"] and mostrar_hvl:
-                mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
-                hvl, _ = calcular_capas_hvl_tvl(mu)
+            # Líneas de HVL y TVL (para fotones y neutrones)
+            if mostrar_hvl:
+                if tipo_radiacion in ["Gamma", "Rayos X"]:
+                    mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                    hvl, _ = calcular_capas_hvl_tvl(mu)
+                elif tipo_radiacion == "Neutrones":
+                    sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
+                    sigma_macroscopica = params['densidad_atomica'] * sigma * 1e-24
+                    hvl = np.log(2) / sigma_macroscopica if sigma_macroscopica > 0 else 0
+                else:
+                    hvl = 0
+                
                 if hvl > 0 and hvl <= espesor_max:
                     fig.add_vline(
                         x=hvl,
                         line_dash="dash",
                         line_color="red",
-                        annotation_text=f"HVL = {hvl:.2f} cm",
+                        annotation_text=f"HVL{' (eq)' if tipo_radiacion=='Neutrones' else ''} = {hvl:.2f} cm",
                         annotation_position="top right"
                     )
             
-            if tipo_radiacion in ["Gamma", "Rayos X"] and mostrar_tvl:
-                mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
-                _, tvl = calcular_capas_hvl_tvl(mu)
+            if mostrar_tvl:
+                if tipo_radiacion in ["Gamma", "Rayos X"]:
+                    mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
+                    _, tvl = calcular_capas_hvl_tvl(mu)
+                elif tipo_radiacion == "Neutrones":
+                    sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
+                    sigma_macroscopica = params['densidad_atomica'] * sigma * 1e-24
+                    tvl = np.log(10) / sigma_macroscopica if sigma_macroscopica > 0 else 0
+                else:
+                    tvl = 0
+                
                 if tvl > 0 and tvl <= espesor_max:
                     fig.add_vline(
                         x=tvl,
                         line_dash="dot",
                         line_color="blue",
-                        annotation_text=f"TVL = {tvl:.2f} cm",
+                        annotation_text=f"TVL{' (eq)' if tipo_radiacion=='Neutrones' else ''} = {tvl:.2f} cm",
                         annotation_position="top right"
                     )
             
