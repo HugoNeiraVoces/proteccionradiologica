@@ -149,8 +149,8 @@ def obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion
     """Coeficiente de atenuación para fotones"""
     coeficientes = {       
         'Aire': {
-            'Gamma': {0.001: 0.0005, 0.01: 0.0008, 0.1: 0.002, 0.5: 0.008, 1.0: 0.015, 5.0: 0.006, 10.0: 0.003},
-            'Rayos X': {0.001: 0.0005, 0.01: 0.0008, 0.1: 0.002}
+            'Gamma': {0.001: 1.5e-5, 0.01: 1.2e-5, 0.1: 1.8e-4, 0.5: 7.5e-5, 1.0: 7.7e-5, 5.0: 3.5e-5, 10.0: 2.5e-5},
+            'Rayos X': {0.001: 1.5e-5, 0.01: 1.2e-5, 0.1: 1.8e-4}
         },
         'Plomo': {
             'Gamma': {0.001: 150.0, 0.01: 26.0, 0.1: 59.7, 0.5: 1.71, 1.0: 0.776, 5.0: 0.202, 10.0: 0.102},
@@ -203,7 +203,7 @@ def obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion
 def obtener_seccion_eficaz_neutrones(elemento, energia_mev):
     """Sección eficaz para neutrones (barns)"""
     secciones = {
-        'Aire': {0.000025: 0.5, 0.001: 0.3, 1.0: 0.2, 10.0: 0.1},
+        'Aire': {0.000025: 5.0, 0.001: 10.0, 1.0: 2.0, 10.0: 1.0},
         'Plomo': {0.000025: 0.17, 0.001: 0.3, 1.0: 5.0, 10.0: 3.0},
         'Acero': {0.000025: 2.5, 0.001: 2.8, 1.0: 3.0, 10.0: 2.0},
         'Hormigón': {0.000025: 4.0, 0.001: 5.0, 1.0: 8.0, 10.0: 6.0},
