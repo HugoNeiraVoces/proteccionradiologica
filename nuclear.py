@@ -32,11 +32,13 @@ def calcular_atenuacion_beta(I0, energia_mev, densidad_material, x):
     if energia_mev <= 0:
         return I0
     
-    # Alcance aproximado en g/cm²
+    # Alcance aproximado en g/cm² (fórmula simplificada común)
+    # Para E > 0.8 MeV: R ≈ 0.5·E_max g/cm²
+    # Para E < 0.8 MeV: R ≈ 0.15·E_max^{1.5} g/cm²
     if energia_mev < 0.8:
         alcance_gcm2 = 0.15 * energia_mev ** 1.5
     else:
-        alcance_gcm2 = 0.5 * energia_mev
+        alcance_gcm2 = 0.5 * energia_mev  # E_max en MeV
     
     # Convertir espesor x (cm) a espesor másico (g/cm²)
     espesor_masico = x * densidad_material
@@ -45,7 +47,8 @@ def calcular_atenuacion_beta(I0, energia_mev, densidad_material, x):
     if espesor_masico >= alcance_gcm2:
         return 0.0
     
-    # Modelo simplificado
+    # Modelo simplificado de atenuación gradual
+    # Podría mejorarse con una curva más realista, pero para fines educativos está bien
     fraccion_atenuada = espesor_masico / alcance_gcm2
     return I0 * (1 - fraccion_atenuada ** 2)
 
@@ -65,22 +68,17 @@ def calcular_atenuacion_alfa(I0, energia_mev, densidad_material, x):
     if energia_mev <= 0:
         return I0
     
-    # Alcance en aire (cm) - fórmula aproximada
-    if energia_mev < 4:
-        alcance_aire = 0.56 * energia_mev ** 1.5  # Más preciso para bajas energías
-    else:
-        alcance_aire = 1.24 * energia_mev - 2.62  # Más preciso para altas energías
+    # Usar UNA fórmula consistente: R_aire = 0.3 * E^{1.5} (cm)
+    alcance_aire = 0.3 * energia_mev ** 1.5
     
     densidad_aire = 0.001225
     alcance_material = alcance_aire * (densidad_aire / densidad_material)
     
     # Las partículas alfa prácticamente NO se atenúan hasta el final de su alcance
-    # Solo consideramos que se detienen completamente al alcanzar el alcance
     if x >= alcance_material:
         return 0.0
     
-    # Para x < alcance: prácticamente sin atenuación (pérdidas por ionización, no atenuación)
-    # Aproximamos que la intensidad se mantiene constante hasta el alcance
+    # Para x < alcance: prácticamente sin atenuación
     return I0
 
 def obtener_parametros_material(elemento):
@@ -940,12 +938,13 @@ def main():
             """)
             
             st.subheader("2. Partículas Beta")
-            st.latex(r"R \approx 0.5 \cdot E_{\text{max}} \quad (\text{g/cm}^2)")
+            st.latex(r"R \approx 0.5 \cdot E_{\text{max}} \quad (\text{g/cm}^2) \quad \text{para } E > 0.8 \text{ MeV}")
+            st.latex(r"R \approx 0.15 \cdot E_{\text{max}}^{1.5} \quad (\text{g/cm}^2) \quad \text{para } E < 0.8 \text{ MeV}")
             st.markdown("""
-            - R = alcance másico [g/cm²]
-            - E_max = energía máxima [MeV]
-            - En material: R_material = R / ρ
-            - Modelo simplificado: I(x) = 0 si x ≥ R_material
+            - **Alcance másico:** Expresado en g/cm² (independiente del material)
+            - **Alcance lineal:** R_lineal = R_másico / ρ (cm)
+            - **Atenuación:** Modelo simplificado con atenuación gradual hasta el alcance
+            - **Para E_max en MeV**
             """)
         
         with col_mod2:
@@ -960,11 +959,13 @@ def main():
             """)
             
             st.subheader("4. Partículas Alfa")
-            st.latex(r"R_{\text{aire}} \approx 0.3 \cdot E^{3/2} \quad (\text{cm})")
+            st.latex(r"R_{\text{aire}} \approx 0.3 \cdot E^{1.5} \quad (\text{cm})")
             st.markdown("""
-            - R_aire = alcance en aire [cm]
-            - En otros materiales: R_material = R_aire · (ρ_aire/ρ_material)
-            - Atenuación casi completa al alcanzar R
+            - **Alcance en aire:** R_aire ≈ 0.3·E^{1.5} cm (E en MeV)
+            - **En materiales densos:** R_material = R_aire × (ρ_aire/ρ_material)
+            - **Comportamiento:** Las partículas alfa no se atenúan gradualmente.  
+              Mantienen intensidad constante hasta su alcance total, luego se detienen abruptamente.
+            - **Modelo:** I(x) = I₀ si x < R_material, I(x) = 0 si x ≥ R_material
             """)
         
         st.divider()
