@@ -404,27 +404,37 @@ def main():
             espesor_max = st.slider(
                 "Espesor máximo (cm):",
                 min_value=0.001,
-                max_value=1.0,
-                value=0.1,
+                max_value=10.0,  # Aumentado de 1.0 a 10.0 cm
+                value=1.0,
                 step=0.001,
-                help="Partículas alfa tienen alcance muy corto"
+                help="Partículas alfa tienen alcance muy corto (normalmente <10 cm en aire)"
             )
         elif tipo_radiacion == "Beta":
             espesor_max = st.slider(
                 "Espesor máximo (cm):",
                 min_value=0.1,
-                max_value=10.0,
-                value=2.0,
-                step=0.1,
-                help="Partículas beta tienen alcance limitado"
+                max_value=2000.0,  # Aumentado de 10.0 a 2000.0 cm (20 m)
+                value=100.0,
+                step=1.0,
+                help="Partículas beta pueden viajar metros en aire"
             )
-        else:
+        elif tipo_radiacion == "Neutrones":
             espesor_max = st.slider(
                 "Espesor máximo (cm):",
                 min_value=1,
-                max_value=500,
-                value=100,
-                step=10
+                max_value=10000.0,  # Aumentado a 100 m
+                value=1000.0,
+                step=10.0,
+                help="Neutrones requieren grandes espesores para atenuación significativa"
+            )
+        else:  # Gamma y Rayos X
+            espesor_max = st.slider(
+                "Espesor máximo (cm):",
+                min_value=1,
+                max_value=5000.0,  # Aumentado a 50 m
+                value=500.0,
+                step=10.0,
+                help="Fotones requieren espesores considerables para atenuación completa"
             )
 
         st.divider()
@@ -656,8 +666,9 @@ def main():
             slider_container = st.container()
             
             with slider_container:
-                # Determinar valor inicial para el slider
-                espesor_default = min(0.1 if tipo_radiacion == "Alfa" else 10.0, float(espesor_max))
+                # Valor inicial como porcentaje del máximo (1% para alfa, 5% para otros)
+                porcentaje_inicial = 0.01 if tipo_radiacion == "Alfa" else 0.05
+                espesor_default = min(float(espesor_max) * porcentaje_inicial, float(espesor_max))
                 
                 # Crear dos columnas: una para el slider y otra para el porcentaje
                 col_slider, col_percent = st.columns([3, 1])
