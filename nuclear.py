@@ -458,7 +458,7 @@ def main():
         else:
             mostrar_hvl = False
             mostrar_tvl = False
-            st.info("HVL/TVL solo aplican a fotones y su equivalene solo en neutrones")
+            st.info("HVL/TVL solo aplican a fotones y su equivalente solo en neutrones")
         
         escala_log = st.checkbox("Escala logarítmica en Y", value=False)
 
