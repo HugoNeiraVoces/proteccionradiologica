@@ -879,49 +879,6 @@ def main():
 
             st.plotly_chart(fig_comparativa, width='stretch')
 
-            # Tabla comparativa
-            st.subheader("📋 Tabla comparativa")
-
-            datos_comparacion = []
-            for material in materiales_seleccionados:
-                params = obtener_parametros_material(material)
-                
-                # Calcular atenuación a espesor máximo
-                I_final = calcular_atenuacion_general(I0, material, energia_mev, tipo_radiacion, espesor_max)
-                atenuacion = (1 - I_final/I0) * 100 if I0 > 0 else 0
-                
-                # Información específica por tipo de radiación
-                if tipo_radiacion in ["Gamma", "Rayos X"]:
-                    mu = obtener_coeficiente_atenuacion_fotones(material, energia_mev, tipo_radiacion)
-                    hvl, tvl = calcular_capas_hvl_tvl(mu)
-                    info_especifico = f"μ={mu:.3f} cm⁻¹, HVL={hvl:.2f} cm"
-                elif tipo_radiacion == "Beta":
-                    if energia_mev < 0.8:
-                        alcance_gcm2 = 0.15 * energia_mev ** 1.5
-                    else:
-                        alcance_gcm2 = 0.5 * energia_mev
-                    alcance_cm = alcance_gcm2 / params['densidad']
-                    info_especifico = f"Alcance≈{alcance_cm:.2f} cm"
-                elif tipo_radiacion == "Neutrones":
-                    sigma = obtener_seccion_eficaz_neutrones(material, energia_mev)
-                    info_especifico = f"σ={sigma:.1f} barns"
-                elif tipo_radiacion == "Alfa":
-                    alcance_aire = 0.3 * energia_mev ** 1.5
-                    alcance_material = alcance_aire * (0.001225 / params['densidad'])
-                    info_especifico = f"Alcance≈{alcance_material*1000:.1f} mm"
-                else:
-                    info_especifico = "-"
-
-                datos_comparacion.append({
-                    'Material': material,
-                    'Densidad (g/cm³)': params['densidad'],
-                    'Aten. a {espesor_max}cm': f"{atenuacion:.1f}%",
-                    'Info específica': info_especifico
-                })
-
-            df_comparacion = pd.DataFrame(datos_comparacion)
-            st.dataframe(df_comparacion, width='stretch')
-
     with tab4:
         st.header("📚 Detalles de los Modelos Matemáticos")
         
