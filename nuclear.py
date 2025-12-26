@@ -606,7 +606,7 @@ def main():
             st.divider()
             
             # Fila 2: Parámetros de simulación y resultados (AHORA CON 3 COLUMNAS)
-            col_fila2_1, col_fila2_2, col_fila2_3 = st.columns(3)
+            col_fila2_1, col_fila2_2 = st.columns(2)
             
             with col_fila2_1:
                 st.markdown("#### ⚙️ Parámetros entrada")
@@ -615,17 +615,6 @@ def main():
             
             with col_fila2_2:
                 st.markdown("#### 📊 Resultados principales")
-                # Calcular atenuación automáticamente (usaremos el valor inicial)
-                # Nota: Para el cálculo inicial, usamos un espesor predeterminado
-                espesor_inicial = 0.1 if tipo_radiacion == "Alfa" else 10.0
-                I_final_inicial = calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, espesor_inicial)
-
-                st.metric("Intensidad inicial (I₀)", f"{I0:.2e}")
-                st.metric("Transmisión inicial", f"{I_final_inicial/I0:.2e}")
-            
-            with col_fila2_3:
-                st.markdown("#### 📈 Información adicional")
-                
                 # Esta información se actualizará después con el slider
                 if tipo_radiacion in ["Gamma", "Rayos X"]:
                     mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
@@ -646,6 +635,7 @@ def main():
                 elif tipo_radiacion == "Neutrones":
                     sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
                     st.metric("Sección eficaz σ", f"{sigma:.1f} barns")
+            
             
             # ============================================
             # SLIDER DEL ESPESOR - AHORA SOLO Y CENTRADO
