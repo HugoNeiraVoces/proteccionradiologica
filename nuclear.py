@@ -743,7 +743,7 @@ def main():
         materiales_seleccionados = st.multiselect(
             "Selecciona materiales para comparar:",
             df_elementos['Nombre'].tolist(),
-            default=['Plomo', 'Acero', 'Hormigón', 'Agua']
+            default=['Aire','Plomo', 'Acero', 'Hormigón', 'Agua']
         )
 
         if materiales_seleccionados:
