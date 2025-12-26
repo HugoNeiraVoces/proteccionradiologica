@@ -365,62 +365,151 @@ def main():
 
         st.divider()
 
-        # Mostrar información del elemento seleccionado
+        # Si hay elemento seleccionado, mostrar gráfica y controles AUTOMÁTICAMENTE
         if 'elemento_seleccionado' in st.session_state:
             elem = st.session_state['elemento_seleccionado']
             info = df_elementos[df_elementos['Simbolo'] == elem].iloc[0]
-
+            
+            st.subheader(f"Simulación para {info['Nombre']}")
+            
             col1, col2, col3 = st.columns(3)
-
+            
             with col1:
                 st.metric("Elemento", info['Nombre'])
                 st.metric("Densidad", f"{info['Densidad']} g/cm³")
-
+            
             with col2:
                 st.metric("Grupo", info['Grupo'])
                 st.metric("Efectividad", info['Blindaje'])
-
+            
             with col3:
                 # Calcular coeficiente para este elemento
                 mu = obtener_coeficiente_atenuacion(info['Nombre'], energia_mev, tipo_radiacion)
                 hvl, tvl = calcular_capas_hvl_tvl(mu)
-
+                
                 st.metric("μ (cm⁻¹)", f"{mu:.4f}")
                 st.metric("HVL", f"{hvl:.1f} cm")
-
-        # Selector de espesor para el elemento seleccionado
-        if 'elemento_seleccionado' in st.session_state:
+            
+            # Slider para espesor que se actualiza automáticamente
             st.subheader("Configurar blindaje")
-
-            col1, col2 = st.columns(2)
-
-            with col1:
+            
+            col_espesor1, col_espesor2 = st.columns([3, 1])
+            
+            with col_espesor1:
                 espesor = st.slider(
-                    f"Espesor de {st.session_state['elemento_seleccionado']} (cm):",
+                    f"Espesor de {info['Nombre']} (cm):",
                     min_value=0.0,
-                    max_value=100.0,
-                    value=10.0,
-                    step=0.5
+                    max_value=float(espesor_max),
+                    value=min(10.0, float(espesor_max)),
+                    step=0.5,
+                    key=f"espesor_{elem}"
                 )
-
-            with col2:
-                if st.button("🔄 Calcular atenuación", type="primary"):
-                    # Calcular atenuación
-                    elem_nombre = df_elementos[
-                        df_elementos['Simbolo'] == st.session_state['elemento_seleccionado']
-                    ]['Nombre'].iloc[0]
-
-                    mu = obtener_coeficiente_atenuacion(elem_nombre, energia_mev, tipo_radiacion)
-                    I_final = calcular_atenuacion(I0, mu, espesor)
-                    atenuacion = (1 - I_final/I0) * 100
-
-                    st.success(f"""
-                    **Resultados:**
-                    - Intensidad final: {I_final:.2e} partículas/s·cm²
-                    - Atenuación: {atenuacion:.2f}%
-                    - Coeficiente μ: {mu:.4f} cm⁻¹
-                    - HVL: {calcular_capas_hvl_tvl(mu)[0]:.2f} cm
-                    """)
+            
+            with col_espesor2:
+                # Calcular atenuación automáticamente
+                mu = obtener_coeficiente_atenuacion(info['Nombre'], energia_mev, tipo_radiacion)
+                I_final = calcular_atenuacion(I0, mu, espesor)
+                atenuacion = (1 - I_final/I0) * 100
+                
+                st.metric("Atenuación", f"{atenuacion:.1f}%")
+                st.metric("I final", f"{I_final:.2e}")
+            
+            # Gráfica de atenuación AUTOMÁTICA
+            # Calcular curva de atenuación
+            espesores = np.linspace(0, espesor_max, 500)
+            intensidades = calcular_atenuacion(I0, mu, espesores)
+            
+            # Crear gráfica con Plotly
+            fig = go.Figure()
+            
+            # Curva principal
+            fig.add_trace(go.Scatter(
+                x=espesores,
+                y=intensidades,
+                mode='lines',
+                name=f'{info["Nombre"]} (μ={mu:.3f} cm⁻¹)',
+                line=dict(color=info['Color'], width=3),
+                hovertemplate="Espesor: %{x:.1f} cm<br>Intensidad: %{y:.2e}<extra></extra>"
+            ))
+            
+            # Línea vertical para el espesor seleccionado
+            fig.add_vline(
+                x=espesor,
+                line_dash="solid",
+                line_color="green",
+                line_width=2,
+                annotation_text=f"Espesor seleccionado: {espesor} cm",
+                annotation_position="top left"
+            )
+            
+            # Punto en la curva para el espesor seleccionado
+            fig.add_trace(go.Scatter(
+                x=[espesor],
+                y=[I_final],
+                mode='markers',
+                name=f'I = {I_final:.2e}',
+                marker=dict(size=12, color='green'),
+                hovertemplate=f"Espesor: {espesor:.1f} cm<br>Intensidad: {I_final:.2e}<extra></extra>"
+            ))
+            
+            # Líneas de HVL y TVL
+            if mostrar_hvl:
+                hvl, _ = calcular_capas_hvl_tvl(mu)
+                if hvl > 0 and hvl <= espesor_max:
+                    fig.add_vline(
+                        x=hvl,
+                        line_dash="dash",
+                        line_color="red",
+                        annotation_text=f"HVL = {hvl:.1f} cm",
+                        annotation_position="top right"
+                    )
+            
+            if mostrar_tvl:
+                _, tvl = calcular_capas_hvl_tvl(mu)
+                if tvl > 0 and tvl <= espesor_max:
+                    fig.add_vline(
+                        x=tvl,
+                        line_dash="dot",
+                        line_color="blue",
+                        annotation_text=f"TVL = {tvl:.1f} cm",
+                        annotation_position="top right"
+                    )
+            
+            # Configurar layout
+            fig.update_layout(
+                title=f'Atenuación de radiación {tipo_radiacion} ({energia_display}) en {info["Nombre"]}',
+                xaxis_title='Espesor del blindaje (cm)',
+                yaxis_title='Intensidad transmitida (partículas/s·cm²)',
+                hovermode='x unified',
+                template='plotly_white',
+                height=500
+            )
+            
+            if escala_log:
+                fig.update_yaxes(type="log", exponentformat='power')
+            
+            st.plotly_chart(fig, width='stretch')
+            
+            # Información adicional
+            st.subheader("Resultados detallados")
+            
+            col_res1, col_res2, col_res3 = st.columns(3)
+            
+            with col_res1:
+                st.metric("Coeficiente μ", f"{mu:.4f} cm⁻¹")
+                st.metric("Energía", energia_display)
+                st.metric("Intensidad inicial (I₀)", f"{I0:.2e}")
+            
+            with col_res2:
+                hvl, tvl = calcular_capas_hvl_tvl(mu)
+                st.metric("HVL", f"{hvl:.2f} cm")
+                st.metric("TVL", f"{tvl:.2f} cm")
+                st.metric("Espesor en HVLs", f"{espesor/hvl:.2f}" if hvl > 0 else "0")
+            
+            with col_res3:
+                st.metric("Intensidad final (I)", f"{I_final:.2e}")
+                st.metric("Atenuación", f"{atenuacion:.2f}%")
+                st.metric("Transmisión (I/I₀)", f"{I_final/I0:.2e}")
 
     with tab3:
         st.header("Simulación de Atenuación")
@@ -481,7 +570,6 @@ def main():
                 height=500
             )
 
-            # CORRECCIÓN AQUÍ: usar update_yaxes en lugar de update_yaxis
             if escala_log:
                 fig.update_yaxes(type="log", exponentformat='power')
 
@@ -573,7 +661,6 @@ def main():
                 height=500
             )
 
-            # CORRECCIÓN AQUÍ TAMBIÉN: usar update_yaxes en lugar de update_yaxis
             if escala_log:
                 fig_comparativa.update_yaxes(type="log", exponentformat='power')
 
