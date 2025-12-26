@@ -210,7 +210,7 @@ def obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion
 def obtener_seccion_eficaz_neutrones(elemento, energia_mev):
     """Sección eficaz para neutrones (barns)"""
     secciones = {
-        'Aire': {0.000025: 5.0, 0.001: 10.0, 1.0: 2.0, 10.0: 1.0},
+        'Aire': {0.000025: 0.5, 0.001: 0.1, 1.0: 0.05, 10.0: 0.02}
         'Plomo': {0.000025: 0.17, 0.001: 0.3, 1.0: 5.0, 10.0: 3.0},
         'Acero': {0.000025: 2.5, 0.001: 2.8, 1.0: 3.0, 10.0: 2.0},
         'Hormigón': {0.000025: 4.0, 0.001: 5.0, 1.0: 8.0, 10.0: 6.0},
