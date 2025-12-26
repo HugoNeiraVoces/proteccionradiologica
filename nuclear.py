@@ -620,9 +620,7 @@ def main():
                 # Nota: Para el cálculo inicial, usamos un espesor predeterminado
                 espesor_inicial = 0.1 if tipo_radiacion == "Alfa" else 10.0
                 I_final_inicial = calcular_atenuacion_general(I0, nombre_elemento, energia_mev, tipo_radiacion, espesor_inicial)
-                atenuacion_inicial = (1 - I_final_inicial/I0) * 100 if I0 > 0 else 0
-                
-                st.metric("Atenuación inicial", f"{atenuacion_inicial:.1f}%")
+
                 st.metric("Intensidad inicial (I₀)", f"{I0:.2e}")
                 st.metric("Transmisión inicial", f"{I_final_inicial/I0:.2e}")
             
