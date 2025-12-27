@@ -845,7 +845,8 @@ def main():
             st.latex(r"I(x) = I_0 \cdot e^{-\mu \cdot x}")
             st.markdown(r"""
             - $\mu$ = coeficiente de atenuación lineal (cm⁻¹)
-            - $\text{HVL} = \dfrac{\ln(2)}{\mu}$, $\text{TVL} = \dfrac{\ln(10)}{\mu}$
+            - **Capa de medio valor:** Grosor en el cual un material reduce la intensidad de la radiación a la mitad $\text{HVL} = \dfrac{\ln(2)}{\mu}$
+            - **Capa de décimo valor:** Grosor del material que reduce la intensidad de la radiación a la décima parte  $\text{TVL} = \dfrac{\ln(10)}{\mu}$
             """)
             
             st.subheader("2. Partículas Beta")
