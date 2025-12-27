@@ -305,7 +305,7 @@ def calcular_atenuacion_general(I0, elemento, energia_mev, tipo_radiacion, x):
         return calcular_atenuacion_neutrones(I0, sigma, params['densidad_atomica'], x)
     
     elif tipo_radiacion == "Alfa":
-        return calcular_atenuacion_alfa(I0, energia_mev, material_nombre, espesor_cm)
+        return calcular_atenuacion_alfa(I0, energia_mev, elemento, x)
     
     else:
         return I0  # Por defecto
