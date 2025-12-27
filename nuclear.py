@@ -379,48 +379,50 @@ def main():
         # Seleccionar unidad según tipo de radiación
         if tipo_radiacion == "Rayos X":
             unidad = st.radio("Unidad:", ["keV", "MeV"], horizontal=True)
-            default_val = 50.0 if unidad == "keV" else 0.05
-            min_val = 1.0 if unidad == "keV" else 0.001
-            max_val = 300.0 if unidad == "keV" else 0.3
-            step_val = 1.0 if unidad == "keV" else 0.001
-            format_str = "%.0f" if unidad == "keV" else "%.3f"
+            
+            # VALORES POR DEFECTO Y PASOS (sin límites estrictos)
+            if unidad == "keV":
+                default_val = 50.0
+                step_val = 0.1  
+                format_str = "%.0f"
+            else:  # MeV
+                default_val = 0.05
+                step_val = 0.01  # Aumentado de 0.001 a 0.01
+                format_str = "%.3f"
         else:
             unidad = "MeV"
             if tipo_radiacion == "Gamma":
                 default_val = 1.0
-                min_val = 0.001
-                max_val = 10.0
-                step_val = 0.01
-                format_str = "%.3f"
+                step_val = 0.1  # Aumentado de 0.01 a 0.1
+                format_str = "%.2f"
             elif tipo_radiacion == "Beta":
                 default_val = 2.0
-                min_val = 0.01
-                max_val = 10.0
-                step_val = 0.01
-                format_str = "%.2f"
+                step_val = 0.1  # Aumentado de 0.01 a 0.5
+                format_str = "%.1f"
             elif tipo_radiacion == "Neutrones":
                 default_val = 1.0
-                min_val = 0.000001
-                max_val = 20.0
-                step_val = 0.000001
-                format_str = "%.6f"
+                step_val = 0.1  # Aumentado de 0.000001 a 0.5
+                format_str = "%.2f"
             elif tipo_radiacion == "Alfa":
                 default_val = 5.0
-                min_val = 3.0
-                max_val = 10.0
-                step_val = 0.1
+                step_val = 0.1  # Aumentado de 0.1 a 0.5
                 format_str = "%.1f"
 
-        # Input numérico con la unidad seleccionada
+        # Input numérico SIN LÍMITES DE RANGO
         energia = st.number_input(
             f"Energía ({unidad}):",
-            min_value=float(min_val),
-            max_value=float(max_val),
+            min_value=0.0,  # Mínimo cero para permitir cualquier valor
+            max_value=None,  # Sin límite máximo
             value=float(default_val),
             step=float(step_val),
             format=format_str,
-            help=f"Energía de la radiación {tipo_radiacion}"
+            help=f"Energía de la radiación {tipo_radiacion}. Puedes introducir cualquier valor positivo."
         )
+
+        # Validar que la energía sea positiva
+        if energia <= 0:
+            st.error("⚠️ La energía debe ser mayor que 0")
+            energia = float(default_val)  # Valor por defecto si no es válido
 
         # Convertir todo a MeV internamente
         if unidad == "keV":
