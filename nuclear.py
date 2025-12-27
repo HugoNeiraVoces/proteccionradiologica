@@ -412,7 +412,7 @@ def main():
         energia = st.number_input(
             f"Energía ({unidad}):",
             min_value=0.0,  # Mínimo cero
-            max_value=None,  # Un límite alto pero razonable
+            max_value=10000.0,  # Un límite alto pero razonable
             value=float(default_val),
             step=float(step_val),
             format=format_str,
@@ -424,16 +424,38 @@ def main():
             st.error("⚠️ La energía debe ser mayor que 0")
             energia = float(default_val)  # Valor por defecto si no es válido
 
-        # Convertir todo a MeV internamente
+        # Convertir todo a MeV internamente y formatear correctamente
         if unidad == "keV":
             energia_mev = energia / 1000.0
-            energia_display = f"{energia} keV"
+            
+            # Formatear para mostrar sin decimales no necesarios
+            if energia.is_integer():
+                energia_display = f"{int(energia)} keV"
+            else:
+                # Mostrar con 1 decimal máximo
+                energia_display = f"{energia:.1f} keV"
         else:
             energia_mev = energia
-            if energia < 0.001:
-                energia_display = f"{energia*1000:.3f} keV" if energia >= 0.000001 else f"{energia*1e6:.2f} eV"
+            
+            # Formatear según el tipo de radiación para evitar decimales extraños
+            if tipo_radiacion == "Rayos X":
+                energia_display = f"{energia:.3f} MeV"
+            elif tipo_radiacion == "Gamma":
+                energia_display = f"{energia:.2f} MeV"
+            elif tipo_radiacion == "Beta":
+                energia_display = f"{energia:.2f} MeV"
+            elif tipo_radiacion == "Neutrones":
+                # Para neutrones, formatear según la magnitud
+                if energia >= 10:
+                    energia_display = f"{energia:.0f} MeV"
+                elif energia >= 1:
+                    energia_display = f"{energia:.1f} MeV"
+                else:
+                    energia_display = f"{energia:.2f} MeV"
+            elif tipo_radiacion == "Alfa":
+                energia_display = f"{energia:.1f} MeV"
             else:
-                energia_display = f"{energia} MeV"
+                energia_display = f"{energia:.2f} MeV"
 
         # Intensidad inicial
         I0 = st.number_input(
