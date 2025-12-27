@@ -755,7 +755,7 @@ def main():
                 hovertemplate="Espesor: %{x:.3f} cm<br>Intensidad: %{y:.2e}<extra></extra>"
             ))
             
-            # Línea vertical para el espesor seleccionado
+            # Línea vertical para el espesor seleccionado (sin leyenda)
             fig.add_vline(
                 x=espesor,
                 line_dash="solid",
@@ -775,46 +775,49 @@ def main():
                 hovertemplate=f"Espesor: {espesor:.3f} cm<br>Intensidad: {I_final:.2e}<extra></extra>"
             ))
             
-            # Líneas de HVL y TVL (para fotones y neutrones)
-            if mostrar_hvl:
+            # Líneas de HVL y TVL (para fotones y neutrones) - AHORA EN LEYENDA
+            # Solo mostrar si están activados los checkboxes
+            if tipo_radiacion in ["Gamma", "Rayos X", "Neutrones"]:
+                # Calcular HVL y TVL si no están ya calculados
                 if tipo_radiacion in ["Gamma", "Rayos X"]:
                     mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
-                    hvl, _ = calcular_capas_hvl_tvl(mu)
+                    hvl, tvl = calcular_capas_hvl_tvl(mu)
                 elif tipo_radiacion == "Neutrones":
                     sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
                     sigma_macroscopica = params['densidad_atomica'] * sigma * 1e-24
-                    hvl = np.log(2) / sigma_macroscopica if sigma_macroscopica > 0 else 0
-                else:
-                    hvl = 0
+                    if sigma_macroscopica > 0:
+                        hvl = np.log(2) / sigma_macroscopica
+                        tvl = np.log(10) / sigma_macroscopica
+                    else:
+                        hvl = 0
+                        tvl = 0
                 
-                if hvl > 0 and hvl <= espesor_max:
-                    fig.add_vline(
-                        x=hvl,
-                        line_dash="dash",
-                        line_color="red",
-                        annotation_text=f"HVL{' (eq)' if tipo_radiacion=='Neutrones' else ''} = {hvl:.2f} cm",
-                        annotation_position="top right"
-                    )
-            
-            if mostrar_tvl:
-                if tipo_radiacion in ["Gamma", "Rayos X"]:
-                    mu = obtener_coeficiente_atenuacion_fotones(nombre_elemento, energia_mev, tipo_radiacion)
-                    _, tvl = calcular_capas_hvl_tvl(mu)
-                elif tipo_radiacion == "Neutrones":
-                    sigma = obtener_seccion_eficaz_neutrones(nombre_elemento, energia_mev)
-                    sigma_macroscopica = params['densidad_atomica'] * sigma * 1e-24
-                    tvl = np.log(10) / sigma_macroscopica if sigma_macroscopica > 0 else 0
-                else:
-                    tvl = 0
+                # Solo añadir a la leyenda si están habilitados los checkboxes
+                if mostrar_hvl and hvl > 0 and hvl <= espesor_max:
+                    # Crear una línea discontinua para HVL que aparezca en la leyenda
+                    hvl_y = [min(intensidades_grafica), max(intensidades_grafica)]
+                    fig.add_trace(go.Scatter(
+                        x=[hvl, hvl],
+                        y=hvl_y,
+                        mode='lines',
+                        name=f'HVL{" (eq)" if tipo_radiacion=="Neutrones" else ""} = {hvl:.2f} cm',
+                        line=dict(color='red', dash='dash', width=2),
+                        showlegend=True,
+                        hovertemplate=f'HVL{" (equivalente)" if tipo_radiacion=="Neutrones" else ""}: {hvl:.2f} cm<extra></extra>"
+                    ))
                 
-                if tvl > 0 and tvl <= espesor_max:
-                    fig.add_vline(
-                        x=tvl,
-                        line_dash="dot",
-                        line_color="blue",
-                        annotation_text=f"TVL{' (eq)' if tipo_radiacion=='Neutrones' else ''} = {tvl:.2f} cm",
-                        annotation_position="top right"
-                    )
+                if mostrar_tvl and tvl > 0 and tvl <= espesor_max:
+                    # Crear una línea punteada para TVL que aparezca en la leyenda
+                    tvl_y = [min(intensidades_grafica), max(intensidades_grafica)]
+                    fig.add_trace(go.Scatter(
+                        x=[tvl, tvl],
+                        y=tvl_y,
+                        mode='lines',
+                        name=f'TVL{" (eq)" if tipo_radiacion=="Neutrones" else ""} = {tvl:.2f} cm',
+                        line=dict(color='blue', dash='dot', width=2),
+                        showlegend=True,
+                        hovertemplate=f'TVL{" (equivalente)" if tipo_radiacion=="Neutrones" else ""}: {tvl:.2f} cm<extra></extra>"
+                    ))
             
             # Configurar layout
             fig.update_layout(
