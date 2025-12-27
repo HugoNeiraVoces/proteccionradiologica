@@ -383,7 +383,7 @@ def main():
             # VALORES POR DEFECTO Y PASOS SIMPLES
             if unidad == "keV":
                 default_val = 50.0
-                step_val = 10.0  # Saltos de 10 keV
+                step_val = 1.0  # Saltos de 10 keV
                 format_str = "%.0f"  # Sin decimales
             else:  # MeV
                 default_val = 0.05
