@@ -307,16 +307,6 @@ def main():
             index=0
         )
 
-        # Información sobre modelos
-        with st.expander("📖 Modelo utilizado"):
-            if tipo_radiacion in ["Gamma", "Rayos X"]:
-                st.info("**Ley exponencial:** I(x) = I₀·e^(-μx)")
-            elif tipo_radiacion == "Beta":
-                st.info("**Modelo de alcance máximo**")
-            elif tipo_radiacion == "Neutrones":
-                st.info("**Atenuación por sección eficaz nuclear**")
-            elif tipo_radiacion == "Alfa":
-                st.info("**Modelo de alcance corto fijo**")
 
         # ENTRADA DE ENERGÍA FLEXIBLE
         st.markdown("### 🔋 Energía de la radiación")
