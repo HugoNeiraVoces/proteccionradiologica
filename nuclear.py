@@ -35,9 +35,9 @@ def calcular_atenuacion_beta(I0, energia_mev, densidad_material, x):
     # Para E > 0.8 MeV: R ≈ 0.5·E_max g/cm²
     # Para E < 0.8 MeV: R ≈ 0.15·E_max^{1.5} g/cm²
     if energia_mev < 0.8:
-        alcance_gcm2 = 0.15 * energia_mev ** 1.5
+        alcance_gcm2 = 0.407 * energia_mev ** 1.38
     else:
-        alcance_gcm2 = 0.5 * energia_mev  # E_max en MeV
+        alcance_gcm2 = 0.542 * energia_mev - 0.133  # E_max en MeV
     
     # Convertir espesor x (cm) a espesor másico (g/cm²)
     espesor_masico = x * densidad_material
@@ -948,10 +948,7 @@ def main():
         **NIST Physical Reference Data**  
         Coeficientes de atenuación, alcances y secciones eficaces  
         **Enlace:** https://physics.nist.gov/PhysRefData/
-        
-        **IAEA Nuclear Data Services**  
-        Datos nucleares evaluados internacionalmente  
-        **Enlace:** https://www-nds.iaea.org
+
         """)
 
 if __name__ == "__main__":
