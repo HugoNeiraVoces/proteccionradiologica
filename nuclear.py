@@ -543,7 +543,7 @@ def main():
         """)
 
     with tab2:
-        st.header("Tabla Periódica para Blindaje Radiológico")
+        st.header("Simulación de Blindaje Radiológico")
     
         # Generar tabla periódica
         df_elementos = generar_tabla_periodica()
