@@ -532,9 +532,6 @@ def main():
                     # Almacenar elemento seleccionado en session state
                     st.session_state['elemento_seleccionado'] = row['Simbolo']
     
-                # Información adicional en tooltip
-                #st.caption(f"ρ={row['Densidad']} g/cm³")
-    
         st.divider()
     
         # Si hay elemento seleccionado, mostrar gráfica y controles AUTOMÁTICAMENTE
