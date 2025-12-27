@@ -963,10 +963,10 @@ def main():
         
         ### **Partículas Alfa y Cálculo de Masas Efectivas**
         
-        **Universidad de Valencia - Física Nuclear Aplicada**  
-        *"Tema 2: Interacción de la radiación con la materia"*  
-        **Aportación:** Fórmulas para alcance de partículas alfa y método de cálculo de masa atómica efectiva para compuestos  
-        **Enlace:** https://www.uv.es/diazj/fna_tema2.pdf
+        **European Physical Journal Plus (Springer)**  
+        *"A comprehensive study on alpha particle shielding properties of various materials"*  
+        **Aportación:** Estudio detallado sobre propiedades de blindaje para partículas alfa, incluyendo métodos de cálculo de alcance y masas efectivas en diferentes materiales  
+        **Enlace:** https://link.springer.com/article/10.1140/epjp/s13360-025-06345-6
         
         ### **Neutrones**
         
@@ -980,7 +980,7 @@ def main():
         **NIST Physical Reference Data**  
         *Datos fundamentales de interacción radiación-materia*  
         **Aportación:** Coeficientes de atenuación, secciones eficaces y propiedades atómicas certificadas.  
-        **Enlace:** https://physics.nist.gov/PhysRefData/
+        **Enlace:** https://physics.nist.gov/cgi-bin/Xcom/xcom2?Method=Comp&Output2=Hand
         
         **NIST Chemistry WebBook - Name Search**  
         *Base de datos de propiedades químicas y físicas*  
