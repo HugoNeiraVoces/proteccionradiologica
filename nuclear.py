@@ -878,14 +878,13 @@ def main():
             st.subheader("1. Fotones (Gamma/Rayos X)")
             st.latex(r"I(x) = I_0 \cdot e^{-\mu \cdot x}")
             st.markdown(r"""
-            - $\mu$ = coeficiente de atenuación lineal [cm⁻¹]
-            - Depende de: $Z$ (número atómico), $\rho$ (densidad), $E$ (energía)
+            - $\mu$ = coeficiente de atenuación lineal (cm⁻¹)
             - $\text{HVL} = \dfrac{\ln(2)}{\mu}$, $\text{TVL} = \dfrac{\ln(10)}{\mu}$
             """)
             
             st.subheader("2. Partículas Beta")
-            st.latex(r"R_m \approx 0.5 \cdot E_{\text{max}} \quad (\text{g/cm}^2) \quad \text{para } E > 0.8 \text{ MeV}")
-            st.latex(r"R_m \approx 0.15 \cdot E_{\text{max}}^{1.5} \quad (\text{g/cm}^2) \quad \text{para } E < 0.8 \text{ MeV}")
+            st.latex(r"R_m \approx 0.5 \cdot E \quad (\text{g/cm}^2) \quad \text{para } E > 0.8 \text{ MeV}")
+            st.latex(r"R_m \approx 0.15 \cdot E^{\frac{3}{2}} \quad (\text{g/cm}^2) \quad \text{para } E < 0.8 \text{ MeV}")
             st.latex(r"R = \frac{R_m}{\rho} \quad (\text{cm})")
             st.markdown("""
             - **Altas energías (>0.8 MeV):** Predomina la pérdida de energía por radiación
@@ -900,10 +899,8 @@ def main():
             st.latex(r"I(x) = I_0 \cdot e^{-N \cdot \sigma \cdot x}")
             st.markdown("""
             Donde:
-            - N = densidad atómica [átomos/cm³]
-            - σ = sección eficaz total [cm²]
-            - σ varía mucho con energía (resonancias)
-            - 1 barn = 10⁻²⁴ cm²
+            - N = densidad atómica (átomos/cm³)
+            - σ = sección eficaz total (cm²)
             """)
             
             st.subheader("4. Partículas Alfa")
