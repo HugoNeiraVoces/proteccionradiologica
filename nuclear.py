@@ -890,8 +890,8 @@ def main():
             st.markdown("""
             - **Altas energías (>0.8 MeV):** Predomina la pérdida de energía por radiación
             - **Bajas energías (<0.8 MeV):** Predomina la pérdida por ionización
-            - **Alcance másico:$R_m$** Independiente del material
-            - **Alcance lineal:$R$** Alcance en cada material
+            - **Alcance másico ($R_m$):** Independiente del material
+            - **Alcance lineal ($R$):** Alcance en cada material
             - **Atenuación:** Modelo simplificado con atenuación gradual hasta el alcance lineal
             """)
         
