@@ -803,7 +803,7 @@ def main():
                         name=f'HVL{" (eq)" if tipo_radiacion=="Neutrones" else ""} = {hvl:.2f} cm',
                         line=dict(color='red', dash='dash', width=2),
                         showlegend=True,
-                        hovertemplate=f'HVL{" (equivalente)" if tipo_radiacion=="Neutrones" else ""}: {hvl:.2f} cm<extra></extra>"
+                        hovertemplate=f'HVL{" (equivalente)" if tipo_radiacion=="Neutrones" else ""}: {hvl:.2f} cm<extra></extra>'
                     ))
                 
                 if mostrar_tvl and tvl > 0 and tvl <= espesor_max:
@@ -816,7 +816,7 @@ def main():
                         name=f'TVL{" (eq)" if tipo_radiacion=="Neutrones" else ""} = {tvl:.2f} cm',
                         line=dict(color='blue', dash='dot', width=2),
                         showlegend=True,
-                        hovertemplate=f'TVL{" (equivalente)" if tipo_radiacion=="Neutrones" else ""}: {tvl:.2f} cm<extra></extra>"
+                        hovertemplate=f'TVL{" (equivalente)" if tipo_radiacion=="Neutrones" else ""}: {tvl:.2f} cm<extra></extra>'
                     ))
             
             # Configurar layout
