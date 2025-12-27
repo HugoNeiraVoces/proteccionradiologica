@@ -1,7 +1,6 @@
 """
 DASHBOARD INTERACTIVO DE PROTECCIÓN RADIOLÓGICA
-Streamlit app para simulación de blindaje - VERSIÓN FINAL
-Autor: Estudiante de Física Nuclear
+Streamlit app para simulación de blindaje
 """
 
 import streamlit as st
@@ -292,8 +291,8 @@ def main():
     # Título principal
     st.title("☢️ Simulador Interactivo de Protección Radiológica")
     st.markdown("""
-    ### Modelos científicos correctos para cada tipo de radiación
-    *Trabajo de Física Nuclear - Protección Radiológica y Sistemas de Blindaje Avanzado*
+    ### Trabajo de Física Nuclear - Protección Radiológica y Sistemas de Blindaje Avanzado
+    *Hugo Neira, Alejandro González, David López y David Moyano*
     """)
 
     # Sidebar para controles
@@ -459,14 +458,13 @@ def main():
     ])
 
     with tab1:
-        st.header("🏠 Bienvenido al Simulador de Blindaje Radiológico")
+        st.header("Bienvenido al Simulador de Blindaje Radiológico")
         
         st.markdown("""
-        ## 📋 ¿Qué puedes hacer con esta aplicación?
+        ### ¿Qué puedes hacer con esta aplicación?
         
         Esta herramienta interactiva te permite simular la atenuación de diferentes tipos 
-        de radiación a través de diversos materiales de blindaje, aplicando **modelos físicamente correctos** 
-        para cada tipo de radiación.
+        de radiación a través de diversos materiales de blindaje.
         """)
         
         col1, col2 = st.columns(2)
@@ -474,23 +472,18 @@ def main():
         with col1:
             st.subheader("🎯 **Funcionalidades principales:**")
             st.markdown("""
-            1. **Tabla Periódica Interactiva**
-               - Selecciona elementos y materiales de blindaje
-               - Visualiza propiedades clave (densidad, efectividad)
-               - Gráficas automáticas al seleccionar
+            1. **Simulación**
+               - Selecciona materiales de blindaje.
+               - Selecciona el tipo de radiación a la que estará expuesto y los parámetros de la misma.
+               - Visualiza propiedades clave y gráfica de atenuación.
             
-            2. **Simulación de Atenuación**
-               - Modelos correctos para cada tipo de radiación
-               - Para fotones: Ley exponencial con HVL/TVL
-               - Para otras radiaciones: Modelos específicos
-            
-            3. **Comparación de Materiales**
+            2. **Comparación de Materiales**
                - Compara múltiples materiales simultáneamente
                - Análisis de efectividad relativa
             
-            4. **Información Teórica**
+            3. **Información Teórica**
                - Fundamentos físicos de la atenuación
-               - Explicación de modelos matemáticos
+               - Explicación de modelos simplificados
             """)
         
         with col2:
@@ -499,47 +492,23 @@ def main():
             ### Paso 1: Configura los parámetros
             - Usa la barra lateral para seleccionar:
               - **Tipo de radiación** (Gamma, Beta, Neutrones, Rayos X, Alfa)
-              - **Energía** (con unidad apropiada: keV o MeV)
+              - **Energía**
               - **Intensidad inicial**
-              - **Opciones de visualización**
+              - **Grosor máximo del material** (esto marcará la escala de la gráfica)
+              - **Opciones de visualización** (HVL, TVL y escala logarítmica)
             
             ### Paso 2: Selecciona un material
-            - Ve a la pestaña "Tabla Periódica"
+            - Ve a la pestaña "Simulación"
             - Haz clic en cualquier elemento/material
             
             ### Paso 3: Explora y compara
             - Observa la curva de atenuación
             - Compara con otros materiales
-            - Ajusta espesores y parámetros
+            - Ajusta grosor y observa la atenuación
             """)
         
-        st.divider()
-        
-        st.subheader("📊 **Modelos científicos implementados:**")
-        
-        datos_modelos = {
-            "Tipo de radiación": ["Fotones (Gamma/Rayos X)", "Partículas Beta", "Neutrones", "Partículas Alfa"],
-            "Modelo físico": [
-                "Ley de atenuación exponencial: I(x) = I₀·e^(-μx)",
-                "Modelo de alcance máximo (range)",
-                "Atenuación por sección eficaz nuclear",
-                "Modelo de alcance corto fijo"
-            ],
-            "Parámetros clave": [
-                "μ (coeficiente de atenuación), HVL, TVL",
-                "Energía máxima, densidad del material",
-                "Sección eficaz σ, densidad atómica",
-                "Energía, densidad del material"
-            ]
-        }
-        
-        st.dataframe(pd.DataFrame(datos_modelos), width='stretch')
-        
         st.warning("""
-        ⚠️ **Importante científico:** 
-        - La ley exponencial **solo es válida** para fotones (Rayos X y Gamma)
-        - Para otras radiaciones se utilizan modelos físicos específicos
-        - Esta aplicación usa modelos simplificados para fines educativos
+        ⚠️ **Importante: Esta aplicación usa modelos simplificados para fines educativos**
         """)
 
     with tab2:
