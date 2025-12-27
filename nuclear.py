@@ -59,32 +59,81 @@ def calcular_atenuacion_neutrones(I0, sigma_total, densidad_atomica, x):
     N = densidad_atomica
     return I0 * np.exp(-N * sigma_cm2 * x)
 
-def calcular_atenuacion_alfa(I0, energia_mev, densidad_material, x):
+def calcular_alcance_alfa(energia_mev, material_nombre):
     """
-    Modelo para partículas alfa - solo pérdida de energía, no atenuación real
-    Las partículas alfa rara vez se atenúan, solo pierden energía y se detienen
+    Calcula el alcance de partículas alfa en un material usando la regla de Bragg-Kleeman.
+
+    Parámetros:
+    - energia_mev: Energía de la partícula alfa en MeV.
+    - material_nombre: Nombre del material (debe coincidir con las claves en obtener_parametros_material).
+
+    Retorna:
+    - alcance_material: Alcance lineal en el material (cm).
+
+    Modelo:
+    1. Alcance en aire de referencia: R_aire = 0.3 * E^(1.5) cm
+    2. Corrección de Bragg-Kleeman para otros materiales:
+       R_material = R_aire * (ρ_aire/ρ_material) * √(A_eff_material / A_eff_aire)
+
+    Referencia para A_effective: A_eff = ( Σ (w_i / √A_i) )⁻¹
+    (Analysis of ionizing charged-particle shielding and range, Eur. Phys. J. Plus, 2025)
     """
+    # 1. Parámetros del aire (material de referencia)
+    densidad_aire = 0.001225          # g/cm³
+    masa_eff_aire = 3.82              # Valor A_effective para aire (calculado previamente)
+
+    # 2. Obtener parámetros del material de blindaje
+    params_material = obtener_parametros_material(material_nombre)
+    densidad_material = params_material['densidad']
+    masa_eff_material = params_material['masa_atomica_efectiva']
+
+    # 3. Calcular alcance en aire (fórmula simplificada para fines educativos)
+    # Nota: Para mayor precisión, se podrían usar fórmulas empíricas más complejas.
     if energia_mev <= 0:
-        return I0
-    
-    # Usar UNA fórmula consistente: R_aire = 0.3 * E^{1.5} (cm)
-    alcance_aire = 0.3 * energia_mev ** 1.5
-    
-    densidad_aire = 0.001225
-    alcance_material = alcance_aire * (densidad_aire / densidad_material)
-    
-    # Las partículas alfa prácticamente NO se atenúan hasta el final de su alcance
-    if x >= alcance_material:
         return 0.0
-    
-    # Para x < alcance: prácticamente sin atenuación
-    return I0
+    alcance_aire_cm = 0.3 * (energia_mev ** 1.5)
+
+    # 4. Aplicar la regla de Bragg-Kleeman para escalar al material
+    factor_densidad = densidad_aire / densidad_material
+    factor_masa = (masa_eff_material / masa_eff_aire) ** 0.5  # Raíz cuadrada
+    alcance_material_cm = alcance_aire_cm * factor_densidad * factor_masa
+
+    return alcance_material_cm
+
+
+def calcular_atenuacion_alfa(I0, energia_mev, material_nombre, espesor_cm):
+    """
+    Calcula la intensidad transmitida de partículas alfa a través de un material.
+
+    Parámetros:
+    - I0: Intensidad inicial (partículas/s·cm²).
+    - energia_mev: Energía de la partícula alfa en MeV.
+    - material_nombre: Nombre del material del blindaje.
+    - espesor_cm: Espesor del material (cm).
+
+    Retorna:
+    - I_transmitida: Intensidad transmitida (partículas/s·cm²).
+
+    Modelo físico:
+    Las partículas alfa tienen un alcance definido. No se atenúan gradualmente.
+    - Si el espesor es MAYOR O IGUAL que el alcance total: intensidad transmitida = 0.
+    - Si el espesor es MENOR que el alcance total: intensidad transmitida = I0 (sin atenuación).
+    """
+    # 1. Calcular el alcance total en el material
+    alcance_total_cm = calcular_alcance_alfa(energia_mev, material_nombre)
+
+    # 2. Aplicar el modelo de alcance fijo (sin atenuación gradual)
+    if espesor_cm >= alcance_total_cm:
+        return 0.0
+    else:
+        return I0
 
 def obtener_parametros_material(elemento):
     """Obtiene parámetros físicos del material"""
     materiales = {
         'Aire': {
             'densidad': 0.001225,
+            'masa_atomica_efectiva': 3.82,  # NUEVO: 1/(0.755/√14 + 0.232/√16 + 0.013/√40)
             'Z_efectivo': 7.64,  # Promedio ponderado (78% N₂, 21% O₂, 1% Ar)
             'sigma_neutrones': 0.2,  # Baja sección eficaz
             'densidad_atomica': 5.0e19,  # Mucho menor que sólidos
@@ -93,12 +142,14 @@ def obtener_parametros_material(elemento):
         'Plomo': {
             'densidad': 11.34,
             'Z_efectivo': 82,
+            'masa_atomica_efectiva': 207.2,  # Elemento puro: A_effective = A
             'sigma_neutrones': 5.0,
             'densidad_atomica': 3.3e22,
             'Color': '#A0522D'
         },
         'Acero': {
             'densidad': 7.85,
+            'masa_atomica_efectiva': 7.43,  # NUEVO: 1/(0.995/√55.85 + 0.005/√12.01)
             'Z_efectivo': 26,
             'sigma_neutrones': 3.0,
             'densidad_atomica': 8.5e22,
@@ -106,6 +157,7 @@ def obtener_parametros_material(elemento):
         },
         'Hormigón': {
             'densidad': 2.35,
+            'masa_atomica_efectiva': 4.51,  # NUEVO: 1/(0.5/√16 + 0.25/√28.09 + 0.1/√40.08 + 0.15/√20)
             'Z_efectivo': 'mix',
             'sigma_neutrones': 8.0,
             'densidad_atomica': 1.0e23,
@@ -113,6 +165,7 @@ def obtener_parametros_material(elemento):
         },
         'Agua': {
             'densidad': 1.00,
+            'masa_atomica_efectiva': 3.00,  # NUEVO: 1/(0.1119/√1.008 + 0.8881/√16)
             'Z_efectivo': 'mix',
             'sigma_neutrones': 40.0,
             'densidad_atomica': 3.3e22,
@@ -120,6 +173,7 @@ def obtener_parametros_material(elemento):
         },
         'Wolframio': {
             'densidad': 19.25,
+            'masa_atomica_efectiva': 183.84,
             'Z_efectivo': 74,
             'sigma_neutrones': 4.5,
             'densidad_atomica': 6.3e22,
@@ -127,6 +181,7 @@ def obtener_parametros_material(elemento):
         },
         'Uranio': {
             'densidad': 19.10,
+            'masa_atomica_efectiva': 238.03,
             'Z_efectivo': 92,
             'sigma_neutrones': 7.0,
             'densidad_atomica': 4.8e22,
@@ -134,6 +189,7 @@ def obtener_parametros_material(elemento):
         },
         'Boro': {
             'densidad': 2.34,
+            'masa_atomica_efectiva': 10.81,
             'Z_efectivo': 5,
             'sigma_neutrones': 100.0,
             'densidad_atomica': 1.3e23,
@@ -143,6 +199,7 @@ def obtener_parametros_material(elemento):
     
     return materiales.get(elemento, {
         'densidad': 2.0,
+        'masa_atomica_efectiva': 10.0,
         'Z_efectivo': 10,
         'sigma_neutrones': 5.0,
         'densidad_atomica': 5e22,
@@ -248,7 +305,7 @@ def calcular_atenuacion_general(I0, elemento, energia_mev, tipo_radiacion, x):
         return calcular_atenuacion_neutrones(I0, sigma, params['densidad_atomica'], x)
     
     elif tipo_radiacion == "Alfa":
-        return calcular_atenuacion_alfa(I0, energia_mev, params['densidad'], x)
+        return calcular_atenuacion_alfa(I0, energia_mev, material_nombre, espesor_cm)
     
     else:
         return I0  # Por defecto
