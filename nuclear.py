@@ -885,7 +885,7 @@ def main():
         st.divider()
         
         st.subheader("Referencias")
-        st.markdown("""
+        st.markdown(r"""
         ### **Modelos y Ecuaciones Simplificadas**
         
         **NCRP Report No. 151 (2005)**  
@@ -948,6 +948,10 @@ def main():
         **NIST Physical Reference Data**  
         Coeficientes de atenuación, alcances y secciones eficaces  
         **Enlace:** https://physics.nist.gov/PhysRefData/
+        
+        **IAEA Nuclear Data Services**  
+        Datos nucleares evaluados internacionalmente  
+        **Enlace:** https://www-nds.iaea.org
         """)
 
 if __name__ == "__main__":
