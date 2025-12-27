@@ -850,15 +850,15 @@ def main():
             """)
             
             st.subheader("2. Partículas Beta")
-            st.latex(r"R_m \approx 0.5 \cdot E \quad (\text{g/cm}^2) \quad \text{para } E > 0.8 \text{ MeV}")
-            st.latex(r"R_m \approx 0.15 \cdot E^{\frac{3}{2}} \quad (\text{g/cm}^2) \quad \text{para } E < 0.8 \text{ MeV}")
+            st.latex(r"R_m \approx 0.542 \cdot E - 0.133 \quad (\text{g/cm}^2) \quad \text{para } E > 0.8 \text{ MeV}")
+            st.latex(r"R_m \approx 0.407 \cdot E^{1.38} \quad (\text{g/cm}^2) \quad \text{para } E < 0.8 \text{ MeV}")
             st.latex(r"R = \frac{R_m}{\rho} \quad (\text{cm})")
             st.markdown("""
             - **Altas energías (>0.8 MeV):** Predomina la pérdida de energía por radiación
             - **Bajas energías (<0.8 MeV):** Predomina la pérdida por ionización
             - **Alcance másico ($R_m$):** Independiente del material
             - **Alcance lineal ($R$):** Alcance en cada material
-            - **Atenuación:** Modelo simplificado con atenuación gradual hasta el alcance lineal
+            - **Atenuación:** Modelo experimental
             """)
         
         with col_mod2:
