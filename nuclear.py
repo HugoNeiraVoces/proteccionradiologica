@@ -929,10 +929,8 @@ def main():
             st.subheader("4. Partículas Alfa")
             st.latex(r"R_{\text{aire}} \approx 0.3 \cdot E^{1.5} \quad (\text{cm})")
             st.latex(r"R_{\text{material}} = R_{\text{aire}} \cdot \frac{\rho_{\text{aire}}}{\rho_{\text{material}}} \cdot \sqrt{\frac{A_{\text{eff, material}}}{A_{\text{eff, aire}}}}")
-            st.markdown("""
-            **Cálculo de la masa atómica efectiva ($A_{\text{eff}}$) para compuestos:**
-            """)
             st.markdown("**Cálculo de la masa atómica efectiva ($A_{eff}$) para compuestos:**")
+            st.latex(r"A_{\text{eff}} = \left( \sum_i \frac{w_i}{\sqrt{A_i}} \right)^{-1}")
             st.markdown(""" siendo $w_i$ la fracción en peso del elemento $i$ en el compuesto y $A_i$ la masa atómica del elemento $i$. En los elementos se utiliza simplemente la masa atómica.
             """)
             st.markdown("""
