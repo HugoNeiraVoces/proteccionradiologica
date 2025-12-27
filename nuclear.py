@@ -884,13 +884,16 @@ def main():
             """)
             
             st.subheader("2. Partículas Beta")
-            st.latex(r"R \approx 0.5 \cdot E_{\text{max}} \quad (\text{g/cm}^2) \quad \text{para } E > 0.8 \text{ MeV}")
-            st.latex(r"R \approx 0.15 \cdot E_{\text{max}}^{1.5} \quad (\text{g/cm}^2) \quad \text{para } E < 0.8 \text{ MeV}")
+            st.latex(r"R_m \approx 0.5 \cdot E_{\text{max}} \quad (\text{g/cm}^2) \quad \text{para } E > 0.8 \text{ MeV}")
+            st.latex(r"R_m \approx 0.15 \cdot E_{\text{max}}^{1.5} \quad (\text{g/cm}^2) \quad \text{para } E < 0.8 \text{ MeV}")
+            st.divider
+            st.latex(r"R = \frac{R_m}{\rho} \quad (\text{cm})")
             st.markdown("""
-            - **Alcance másico:** Expresado en g/cm² (independiente del material)
-            - **Alcance lineal:** R_lineal = R_másico / ρ (cm)
-            - **Atenuación:** Modelo simplificado con atenuación gradual hasta el alcance
-            - **Para E_max en MeV**
+            - **Altas energías (>0.8 MeV):** Predomina la pérdida de energía por radiación
+            - **Bajas energías (<0.8 MeV):** Predomina la pérdida por ionización
+            - **Alcance másico:$\text{R_m}$** Independiente del material
+            - **Alcance lineal:$\text{R}$** Alcance en cada material
+            - **Atenuación:** Modelo simplificado con atenuación gradual hasta el alcance lineal
             """)
         
         with col_mod2:
