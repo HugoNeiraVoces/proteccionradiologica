@@ -877,7 +877,7 @@ def main():
             - **Comportamiento simplificado:** Las partículas alfa no se atenúan gradualmente, mantienen intensidad constante hasta su alcance total y luego se detienen abruptamente.
             """)
 
-                st.warning("""
+            st.warning("""
         ⚠️ **Importante** 
             - Esta aplicación usa modelos simplificados para fines educativos
             - Para neutrones, el concepto de HVL y TVL es 'equivalente' ya que los neutrones no siguen una atenuación exponencial simple.
