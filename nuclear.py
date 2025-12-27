@@ -886,7 +886,6 @@ def main():
             st.subheader("2. Partículas Beta")
             st.latex(r"R_m \approx 0.5 \cdot E_{\text{max}} \quad (\text{g/cm}^2) \quad \text{para } E > 0.8 \text{ MeV}")
             st.latex(r"R_m \approx 0.15 \cdot E_{\text{max}}^{1.5} \quad (\text{g/cm}^2) \quad \text{para } E < 0.8 \text{ MeV}")
-            st.divider()
             st.latex(r"R = \frac{R_m}{\rho} \quad (\text{cm})")
             st.markdown("""
             - **Altas energías (>0.8 MeV):** Predomina la pérdida de energía por radiación
