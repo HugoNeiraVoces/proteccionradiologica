@@ -533,7 +533,7 @@ def main():
                     st.session_state['elemento_seleccionado'] = row['Simbolo']
     
                 # Información adicional en tooltip
-                st.caption(f"ρ={row['Densidad']} g/cm³")
+                #st.caption(f"ρ={row['Densidad']} g/cm³")
     
         st.divider()
     
