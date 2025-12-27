@@ -383,29 +383,37 @@ def main():
             # VALORES POR DEFECTO Y PASOS (sin límites estrictos)
             if unidad == "keV":
                 default_val = 50.0
-                step_val = 0.1  
+                step_val = 1.0  # Cambiado de 0.1 a 1.0 para que sea visible con formato sin decimales
                 format_str = "%.0f"
             else:  # MeV
                 default_val = 0.05
-                step_val = 0.01  # Aumentado de 0.001 a 0.01
+                step_val = 0.01  
                 format_str = "%.3f"
         else:
             unidad = "MeV"
             if tipo_radiacion == "Gamma":
                 default_val = 1.0
-                step_val = 0.1  # Aumentado de 0.01 a 0.1
-                format_str = "%.2f"
+                step_val = 0.1
+                format_str = "%.2f" if energia >= 0.1 else "%.3f"  # Formato dinámico
             elif tipo_radiacion == "Beta":
                 default_val = 2.0
-                step_val = 0.1  # Aumentado de 0.01 a 0.5
-                format_str = "%.1f"
+                step_val = 0.1
+                format_str = "%.2f" if energia >= 0.1 else "%.3f"  # Formato dinámico
             elif tipo_radiacion == "Neutrones":
                 default_val = 1.0
-                step_val = 0.1  # Aumentado de 0.000001 a 0.5
-                format_str = "%.2f"
+                # Ajustar step según la energía
+                if energia >= 1.0:
+                    step_val = 0.5
+                    format_str = "%.1f"
+                elif energia >= 0.1:
+                    step_val = 0.1
+                    format_str = "%.2f"
+                else:
+                    step_val = 0.01
+                    format_str = "%.3f"
             elif tipo_radiacion == "Alfa":
                 default_val = 5.0
-                step_val = 0.1  # Aumentado de 0.1 a 0.5
+                step_val = 0.1
                 format_str = "%.1f"
 
         # Input numérico SIN LÍMITES DE RANGO
