@@ -908,12 +908,9 @@ def main():
             
             st.subheader("4. Partículas Alfa")
             st.latex(r"R_{\text{aire}} \approx 0.3 \cdot E^{1.5} \quad (\text{cm})")
-            st.latex(r"R_{\text{material}} = R_{\text{aire}} \cdot \frac{\rho{\text{aire}}}{\rho{\text{material}}}")
+            st.latex(r"R_{\text{material}} = R_{\text{aire}} \cdot \frac{\rho_{\text{aire}}}{\rho_{\text{material}}}")
             st.markdown("""
-            - **En materiales densos:** R_material = R_aire × (ρ_aire/ρ_material)
-            - **Comportamiento:** Las partículas alfa no se atenúan gradualmente.  
-              Mantienen intensidad constante hasta su alcance total, luego se detienen abruptamente.
-            - **Modelo:** I(x) = I₀ si x < R_material, I(x) = 0 si x ≥ R_material
+            - **Comportamiento simplificado:** Las partículas alfa no se atenúan gradualmente, mantienen intensidad constante hasta su alcance total y luego se detienen abruptamente.
             """)
         
         st.divider()
