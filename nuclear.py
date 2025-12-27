@@ -949,16 +949,16 @@ def main():
         st.markdown(r"""
         ### **Rayos X y Fotones Gamma**
         
-        **Biblioteca Digital ILCE**  
-        *"Interacción de la radiación con la materia: Fotones"*  
-        **Aportación:** Explicación detallada de los mecanismos de interacción de fotones (efecto fotoeléctrico, Compton, producción de pares)  
-        **Enlace:** https://bibliotecadigital.ilce.edu.mx/sites/ciencia/volumen2/ciencia3/094/htm/sec_14.htm
+        **U.S. Nuclear Regulatory Commission (NRC)**  
+        *"Radiation Protection and Shielding for Particle Accelerators"*  
+        **Aportación:** Ley de atenuación exponencial, HVL y TVL.
+        **Enlace:** https://www.nrc.gov/docs/ML1126/ML11262A163.pdf
         
         ### **Partículas Beta**
         
         **ScienceDirect - Engineering Topics**  
         *"Energy of Beta Particles"*  
-        **Aportación:** Tablas y datos sobre energía y alcance de partículas beta en diferentes materiales  
+        **Aportación:** Ecuaciones experimentales para la atenuación de la radiación beta.  
         **Enlace:** https://www.sciencedirect.com/topics/engineering/energy-beta-particle
         
         ### **Partículas Alfa y Cálculo de Masas Efectivas**
@@ -972,20 +972,20 @@ def main():
         
         **Universidad de Valencia - Física Nuclear Aplicada**  
         *"Tema 2: Interacción de la radiación con la materia"*  
-        **Aportación:** Modelos de atenuación neutrónica y secciones eficaces para diferentes materiales  
+        **Aportación:** Modelos de atenuación neutrónica 
         **Enlace:** https://www.uv.es/diazj/fna_tema2.pdf
         
         ### **Datos de Referencia y Herramientas**
         
         **NIST Physical Reference Data**  
         *Datos fundamentales de interacción radiación-materia*  
-        **Aportación:** Coeficientes de atenuación, secciones eficaces y propiedades atómicas certificadas  
+        **Aportación:** Coeficientes de atenuación, secciones eficaces y propiedades atómicas certificadas.  
         **Enlace:** https://physics.nist.gov/PhysRefData/
         
-        **WebQC - Calculadora de Masa Molar**  
-        *Herramienta en línea para cálculos químicos*  
-        **Aportación:** Calculadora útil para determinar masas atómicas efectivas y composiciones elementales  
-        **Enlace:** https://es.webqc.org/mmcalc.php
+        **NIST Chemistry WebBook - Name Search**  
+        *Base de datos de propiedades químicas y físicas*  
+        **Aportación:** Información detallada sobre compuestos químicos, incluyendo composición elemental y masas atómicas.  
+        **Enlace:** https://webbook.nist.gov/chemistry/name-ser/
         """)
 
 if __name__ == "__main__":
