@@ -453,7 +453,7 @@ def main():
     # Contenido principal en pestañas
     tab1, tab2, tab3, tab4 = st.tabs([
         "🏠 Inicio y Explicación",
-        "🎯 Tabla Periódica Interactiva", 
+        "🎯 Simulación", 
         "🔍 Comparación de Materiales",
         "📚 Información Teórica"
     ])
@@ -543,7 +543,7 @@ def main():
         """)
 
     with tab2:
-        st.header("Simulación de Blindaje Radiológico")
+        st.header("Materiales de Blindaje")
     
         # Generar tabla periódica
         df_elementos = generar_tabla_periodica()
