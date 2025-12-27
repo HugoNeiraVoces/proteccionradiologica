@@ -877,11 +877,10 @@ def main():
         with col_mod1:
             st.subheader("1. Fotones (Gamma/Rayos X)")
             st.latex(r"I(x) = I_0 \cdot e^{-\mu \cdot x}")
-            st.markdown("""
-            Donde:
-            - μ = coeficiente de atenuación lineal [cm⁻¹]
-            - Depende de: Z (número atómico), ρ (densidad), E (energía)
-            - HVL = ln(2)/μ, TVL = ln(10)/μ
+            st.markdown(r"""
+            - $\mu$ = coeficiente de atenuación lineal [cm⁻¹]
+            - Depende de: $Z$ (número atómico), $\rho$ (densidad), $E$ (energía)
+            - $\text{HVL} = \dfrac{\ln(2)}{\mu}$, $\text{TVL} = \dfrac{\ln(10)}{\mu}$
             """)
             
             st.subheader("2. Partículas Beta")
