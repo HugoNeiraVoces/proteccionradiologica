@@ -865,7 +865,6 @@ def main():
             st.subheader("3. Neutrones")
             st.latex(r"I(x) = I_0 \cdot e^{-N \cdot \sigma \cdot x}")
             st.markdown("""
-            Donde:
             - N = densidad atómica (átomos/cm³)
             - σ = sección eficaz total (cm²)
             """)
@@ -949,7 +948,7 @@ def main():
         **NIST Physical Reference Data**  
         Coeficientes de atenuación, alcances y secciones eficaces  
         **Enlace:** https://physics.nist.gov/PhysRefData/
-
+        """)
 
 if __name__ == "__main__":
     if 'elemento_seleccionado' not in st.session_state:
