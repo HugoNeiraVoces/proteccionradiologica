@@ -947,69 +947,45 @@ def main():
         
         st.subheader("Referencias")
         st.markdown(r"""
-        ### **Modelos y Ecuaciones Simplificadas**
+        ### **Rayos X y Fotones Gamma**
         
-        **NCRP Report No. 151 (2005)**  
-        *"Structural Shielding Design and Evaluation for Megavoltage X- and Gamma-Ray Radiotherapy Facilities"*  
-        **Justificación:** Valida el uso de modelos simplificados con errores ≤20% para fines educativos  
-        **Enlace:** https://ncrponline.org/publications/reports/report-151/
+        **Biblioteca Digital ILCE**  
+        *"Interacción de la radiación con la materia: Fotones"*  
+        **Aportación:** Explicación detallada de los mecanismos de interacción de fotones (efecto fotoeléctrico, Compton, producción de pares)  
+        **Enlace:** https://bibliotecadigital.ilce.edu.mx/sites/ciencia/volumen2/ciencia3/094/htm/sec_14.htm
         
         ### **Partículas Beta**
         
-        **ICRU Report 44 (1989)**  
-        *"Tissue Substitutes in Radiation Dosimetry and Measurement"*  
-        **Aportación:** Fórmulas de alcance másico para partículas beta  
-        - Para E < 0.8 MeV: R ≈ 0.15·E^{1.5} g/cm²  
-        - Para E > 0.8 MeV: R ≈ 0.5·E g/cm²  
-        **Enlace:** https://www.icru.org/report/tissue-substitutes-in-radiation-dosimetry-and-measurement-icru-report-44/
+        **ScienceDirect - Engineering Topics**  
+        *"Energy of Beta Particles"*  
+        **Aportación:** Tablas y datos sobre energía y alcance de partículas beta en diferentes materiales  
+        **Enlace:** https://www.sciencedirect.com/topics/engineering/energy-beta-particle
         
-        **NISTIR 4999 (1992)**  
-        *"Stopping-Power and Range Tables for Electrons"*  
-        **Aportación:** Tablas completas de alcance para partículas beta  
-        **Enlace:** https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir4999.pdf
+        ### **Partículas Alfa y Cálculo de Masas Efectivas**
         
-        ### **Partículas Alfa**
-        
-        **IAEA Safety Reports Series No. 47 (2006)**  
-        *"Radiation Protection in the Design of Radiotherapy Facilities"*  
-        **Aportación:** Fórmula simplificada para alcance en aire: R ≈ 0.3·E^{1.5} cm  
-        **Enlace:** https://www-pub.iaea.org/MTCD/publications/PDF/Pub1227_web.pdf
-        
-        **ICRU Report 49 (1993)**  
-        *"Stopping Powers and Ranges for Protons and Alpha Particles"*  
-        **Aportación:** Método de escalado por densidad para diferentes materiales  
-        **Enlace:** https://www.icru.org/report/stopping-powers-and-ranges-for-protons-and-alpha-particles-icru-report-49/
-        
-        ### **Fotones (Gamma/Rayos X)**
-        
-        **Cember & Johnson (2009)**  
-        *"Introduction to Health Physics" (4ª edición)*  
-        **Aportación:** Ley fundamental de atenuación exponencial: I(x) = I₀·e^{-μx}  
-        **ISBN:** 978-0-07-164323-8
-        
-        **NIST XCOM Database**  
-        *"Photon Cross Sections Database"*  
-        **Aportación:** Coeficientes de atenuación μ para cualquier material y energía  
-        **Enlace:** https://physics.nist.gov/PhysRefData/Xcom/html/xcom1.html
+        **Universidad de Valencia - Física Nuclear Aplicada**  
+        *"Tema 2: Interacción de la radiación con la materia"*  
+        **Aportación:** Fórmulas para alcance de partículas alfa y método de cálculo de masa atómica efectiva para compuestos  
+        **Enlace:** https://www.uv.es/diazj/fna_tema2.pdf
         
         ### **Neutrones**
         
-        **Knoll (2010)**  
-        *"Radiation Detection and Measurement" (4ª edición)*  
-        **Aportación:** Modelo de atenuación exponencial con sección eficaz: I(x) = I₀·e^{-Nσx}  
-        **ISBN:** 978-0-470-13148-0
+        **Universidad de Valencia - Física Nuclear Aplicada**  
+        *"Tema 2: Interacción de la radiación con la materia"*  
+        **Aportación:** Modelos de atenuación neutrónica y secciones eficaces para diferentes materiales  
+        **Enlace:** https://www.uv.es/diazj/fna_tema2.pdf
         
-        **ENDF/B-VIII.0 Database (2018)**  
-        *"Evaluated Nuclear Data File"*  
-        **Aportación:** Secciones eficaces neutrónicas evaluadas para diferentes materiales  
-        **Enlace:** https://www.nndc.bnl.gov/endf/
-        
-        ### **Bases de Datos y Recursos en Línea**
+        ### **Datos de Referencia y Herramientas**
         
         **NIST Physical Reference Data**  
-        Coeficientes de atenuación, alcances y secciones eficaces  
+        *Datos fundamentales de interacción radiación-materia*  
+        **Aportación:** Coeficientes de atenuación, secciones eficaces y propiedades atómicas certificadas  
         **Enlace:** https://physics.nist.gov/PhysRefData/
-
+        
+        **WebQC - Calculadora de Masa Molar**  
+        *Herramienta en línea para cálculos químicos*  
+        **Aportación:** Calculadora útil para determinar masas atómicas efectivas y composiciones elementales  
+        **Enlace:** https://es.webqc.org/mmcalc.php
         """)
 
 if __name__ == "__main__":
