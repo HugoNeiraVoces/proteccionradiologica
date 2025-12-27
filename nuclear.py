@@ -380,51 +380,43 @@ def main():
         if tipo_radiacion == "Rayos X":
             unidad = st.radio("Unidad:", ["keV", "MeV"], horizontal=True)
             
-            # VALORES POR DEFECTO Y PASOS (sin límites estrictos)
+            # VALORES POR DEFECTO Y PASOS SIMPLES
             if unidad == "keV":
                 default_val = 50.0
-                step_val = 1.0  # Cambiado de 0.1 a 1.0 para que sea visible con formato sin decimales
-                format_str = "%.0f"
+                step_val = 10.0  # Saltos de 10 keV
+                format_str = "%.0f"  # Sin decimales
             else:  # MeV
                 default_val = 0.05
-                step_val = 0.01  
-                format_str = "%.3f"
+                step_val = 0.01  # Saltos de 0.01 MeV
+                format_str = "%.3f"  # 3 decimales
         else:
             unidad = "MeV"
             if tipo_radiacion == "Gamma":
                 default_val = 1.0
-                step_val = 0.1
-                format_str = "%.2f" if energia >= 0.1 else "%.3f"  # Formato dinámico
+                step_val = 0.1  # Saltos de 0.1 MeV
+                format_str = "%.2f"  # 2 decimales
             elif tipo_radiacion == "Beta":
                 default_val = 2.0
-                step_val = 0.1
-                format_str = "%.2f" if energia >= 0.1 else "%.3f"  # Formato dinámico
+                step_val = 0.1  # Saltos de 0.1 MeV
+                format_str = "%.2f"  # 2 decimales
             elif tipo_radiacion == "Neutrones":
                 default_val = 1.0
-                # Ajustar step según la energía
-                if energia >= 1.0:
-                    step_val = 0.5
-                    format_str = "%.1f"
-                elif energia >= 0.1:
-                    step_val = 0.1
-                    format_str = "%.2f"
-                else:
-                    step_val = 0.01
-                    format_str = "%.3f"
+                step_val = 0.1  # Saltos de 0.1 MeV
+                format_str = "%.2f"  # 2 decimales
             elif tipo_radiacion == "Alfa":
                 default_val = 5.0
-                step_val = 0.1
-                format_str = "%.1f"
+                step_val = 0.1  # Saltos de 0.1 MeV
+                format_str = "%.1f"  # 1 decimal
 
-        # Input numérico SIN LÍMITES DE RANGO
+        # Input numérico CON VALORES MÁS LÓGICOS
         energia = st.number_input(
             f"Energía ({unidad}):",
-            min_value=0.0,  # Mínimo cero para permitir cualquier valor
-            max_value=None,  # Sin límite máximo
+            min_value=0.0,  # Mínimo cero
+            max_value=None,  # Un límite alto pero razonable
             value=float(default_val),
             step=float(step_val),
             format=format_str,
-            help=f"Energía de la radiación {tipo_radiacion}. Puedes introducir cualquier valor positivo."
+            help=f"Energía de la radiación {tipo_radiacion}. Puedes introducir cualquier valor entre 0 y 10000 {unidad}."
         )
 
         # Validar que la energía sea positiva
