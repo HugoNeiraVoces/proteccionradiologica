@@ -587,7 +587,7 @@ def main():
         cols = st.columns(6)
     
         for idx, row in df_elementos.iterrows():
-            col_idx = idx % 7
+            col_idx = idx % 6
             with cols[col_idx]:
                 # Botón para cada elemento con color personalizado
                 if st.button(
