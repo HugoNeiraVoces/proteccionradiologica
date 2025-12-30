@@ -179,14 +179,6 @@ def obtener_parametros_material(elemento):
             'densidad_atomica': 6.3e22,
             'Color': '#FFD700'
         },
-        'Uranio': {
-            'densidad': 19.10,
-            'masa_atomica_efectiva': 238.03,
-            'Z_efectivo': 92,
-            'sigma_neutrones': 7.0,
-            'densidad_atomica': 4.8e22,
-            'Color': '#000000'
-        },
         'Boro': {
             'densidad': 2.34,
             'masa_atomica_efectiva': 10.81,
@@ -233,10 +225,6 @@ def obtener_coeficiente_atenuacion_fotones(elemento, energia_mev, tipo_radiacion
             'Gamma': {0.001: 80.0, 0.01: 15.0, 0.1: 30.4, 0.5: 1.45, 1.0: 0.648, 5.0: 0.181, 10.0: 0.095},
             'Rayos X': {0.001: 80.0, 0.01: 15.0, 0.1: 30.4}
         },
-        'Uranio': {
-            'Gamma': {0.001: 220.0, 0.01: 45.0, 0.1: 85.3, 0.5: 2.43, 1.0: 1.091, 5.0: 0.252, 10.0: 0.125},
-            'Rayos X': {0.001: 220.0, 0.01: 45.0, 0.1: 85.3}
-        },
         'Boro': {
             'Gamma': {0.001: 1.2, 0.01: 0.8, 0.1: 0.5, 0.5: 0.15, 1.0: 0.08, 5.0: 0.02, 10.0: 0.01},
             'Rayos X': {0.001: 1.2, 0.01: 0.8, 0.1: 0.5}
@@ -270,7 +258,6 @@ def obtener_seccion_eficaz_neutrones(elemento, energia_mev):
         'Hormigón': {0.000025: 4.0, 0.001: 5.0, 1.0: 8.0, 10.0: 6.0},
         'Agua': {0.000025: 40.0, 0.001: 20.0, 1.0: 5.0, 10.0: 3.0},
         'Wolframio': {0.000025: 2.0, 0.001: 2.5, 1.0: 4.5, 10.0: 3.0},
-        'Uranio': {0.000025: 3.0, 0.001: 4.0, 1.0: 7.0, 10.0: 5.0},
         'Boro': {0.000025: 800.0, 0.001: 100.0, 1.0: 2.0, 10.0: 1.0}
     }
     
@@ -327,8 +314,6 @@ def generar_tabla_periodica():
          'Densidad': 11.34, 'Color': '#A0522D', 'Blindaje': 'Alto'},
         {'Simbolo': 'W', 'Nombre': 'Wolframio', 'Z': 74, 'Grupo': 'Metales',
          'Densidad': 19.25, 'Color': '#FFD700', 'Blindaje': 'Muy Alto'},
-        {'Simbolo': 'U', 'Nombre': 'Uranio', 'Z': 92, 'Grupo': 'Actinidos',
-         'Densidad': 19.10, 'Color': '#000000', 'Blindaje': 'Muy Alto'},
         {'Simbolo': 'Ac', 'Nombre': 'Acero', 'Z': 'Mix', 'Grupo': 'Aleaciones',
          'Densidad': 7.85, 'Color': '#778899', 'Blindaje': 'Medio'},
         {'Simbolo': 'Con', 'Nombre': 'Hormigón', 'Z': 'Mix', 'Grupo': 'Compuestos',
@@ -599,7 +584,7 @@ def main():
         df_elementos = generar_tabla_periodica()
     
         # Mostrar tabla periódica como cuadrícula interactiva
-        cols = st.columns(7)
+        cols = st.columns(6)
     
         for idx, row in df_elementos.iterrows():
             col_idx = idx % 7
